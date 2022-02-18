@@ -1,0 +1,114 @@
+version: '3.8'
+
+services:
+  rabbitmq:
+    image: rabbitmq:management
+    container_name: rabbitmq
+    hostname: rabbitmq
+    ports:
+      - 5672:5672
+      - 15672:15672
+    volumes:
+      - rabbitmqdata:/var/lib/rabbitmq
+
+  catalog-mongo:
+    image: mongo
+    container_name: catalog-mongo
+    hostname: catalog.mongo
+    ports:
+      - 27000:27017
+    volumes:
+      - catalogdbdata:/data/db
+
+  catalog-service:
+    image: ggodoi1986/mspoc.catalog.service:1.0.0
+    container_name: catalog-service
+    hostname: mspoc.catalog.service
+    restart: always
+    ports:
+      - 5000:5000
+    environment:
+      - MongoDbSettings__Host=catalog-mongo
+      - RabbitMQSettings__Host=rabbitmq
+    depends_on:
+      - catalog-mongo
+      - rabbitmq
+
+  customer-mongo:
+    image: mongo
+    container_name: customer-mongo
+    hostname: customer.mongo
+    ports:
+      - 27001:27017
+    volumes:
+      - customerdbdata:/data/db
+
+  customer-service:
+    image: ggodoi1986/mspoc.customer.service:1.0.0
+    container_name: customer-service
+    hostname: mspoc.customer.service
+    restart: always
+    ports:
+      - 5001:5001
+    environment:
+      - MongoDbSettings__Host=customer-mongo
+      - RabbitMQSettings__Host=rabbitmq
+    depends_on:
+      - mongo
+      - rabbitmq
+
+  order-mongo:
+    image: mongo
+    container_name: order-mongo
+    hostname: order.mongo
+    ports:
+      - 27002:27017
+    volumes:
+      - orderdbdata:/data/db
+
+  order-service:
+    image: ggodoi1986/mspoc.order.service:1.0.0
+    container_name: order-service
+    hostname: mspoc.order.service
+    restart: always
+    ports:
+      - 5002:5002
+    environment:
+      - MongoDbSettings__Host=order-mongo
+      - RabbitMQSettings__Host=rabbitmq
+    depends_on:
+      - mongo
+      - rabbitmq
+
+  healthchecks:
+    image: xabarilcoding/healthchecksui
+    container_name: healthchecks
+    hostname: healthchecks
+    restart: always
+    ports:
+      - 8080:80
+    volumes:
+      - healthcheckdata:/app/css
+    environment:
+      - storage_provider=InMemory
+      - ui_stylesheet=/app/css/dotnet.css
+      - Logging:LogLevel:Default=Debug
+      - Logging:Loglevel:Microsoft=Warning
+      - Logging:LogLevel:HealthChecks=Debug
+      - EvaluationTimeinSeconds=5
+      - MinimumSecondsBetweenFailureNotifications=60
+      - HealthChecksUI:HealthChecks:0:Name=MSPOC.Catalog.Service
+      - HealthChecksUI:HealthChecks:0:Uri=http://mspoc.catalog.service:5000/healthchecks-data-ui
+      - HealthChecksUI:HealthChecks:1:Name=MSPOC.Customer.Service
+      - HealthChecksUI:HealthChecks:1:Uri=http://mspoc.customer.service:5001/healthchecks-data-ui
+      - HealthChecksUI:HealthChecks:2:Name=MSPOC.Order.Service
+      - HealthChecksUI:HealthChecks:2:Uri=http://mspoc.order.service:5002/healthchecks-data-ui
+
+volumes:
+  catalogdbdata:
+  customerdbdata:
+  orderdbdata:
+  mongodbdata:
+  rabbitmqdata:
+  healthcheckdata:
+
