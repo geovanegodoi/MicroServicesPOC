@@ -71,7 +71,7 @@ This section should list any major frameworks/libraries used to bootstrap the pr
 <!--------------------------------------------------------------------------------------------------------->
 ## Getting Started
 
-We are using in this project a docker compose file in order to simplify the steps related with build and deploy all the microservices, as well as, the setup and exection all the infrastructure resources such as the databases and rabbitmq.
+We are using in this project a docker compose file in order to simplify the steps related with build and deploy all the microservices, as well as, the setup and exwcution of all the infrastructure resources such as the databases and rabbitmq.
 
 All the docker images are available in DockerHub, including the 3 microservices images are available into my [public personal repository](https://hub.docker.com/u/ggodoi1986).
 
