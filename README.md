@@ -230,3 +230,4 @@ It also provides a friendly dashboard where is presented all the monitoring info
 
 ![Healthcheck Service](/images/healthcheck-service.png)
 
+<p align="right">[ <a href="#top">back to top</a> ]</p>
