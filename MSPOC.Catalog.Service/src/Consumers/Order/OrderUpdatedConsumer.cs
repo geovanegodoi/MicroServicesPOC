@@ -1,3 +1,4 @@
+using System;
 using System.Threading.Tasks;
 using MassTransit;
 using MSPOC.CrossCutting;
@@ -23,13 +24,25 @@ namespace MSPOC.Catalog.Service.Consumers
             }
         }
 
-        private async Task UpdateCatalogItemAsync(OrderItemEvent orderItem, Entity.Item catalogItem)
+        private async Task UpdateCatalogItemAsync(OrderItemUpdatedEvent orderItemUpdate, Entity.Item catalogItem)
         {
-            if (orderItem.Quantity > catalogItem.Quantity) 
-                await AddCatalogItemAsync(orderItem, catalogItem);
-            else
+            var orderItem = MapToOrderItemEvent(orderItemUpdate);
+
+            if (orderItemUpdate.NewQuantity > orderItemUpdate.OldQuantity)
+            {
                 await SubtractCatalogItemAsync(orderItem, catalogItem);
+            }
+            else if (orderItemUpdate.NewQuantity < orderItemUpdate.OldQuantity)
+            {
+                await AddCatalogItemAsync(orderItem, catalogItem);
+            }
         }
 
+        private OrderItemEvent MapToOrderItemEvent(OrderItemUpdatedEvent orderItemUpdated)
+            => new OrderItemEvent
+            (
+                ItemId: orderItemUpdated.ItemId,
+                Quantity: Math.Abs(orderItemUpdated.NewQuantity - orderItemUpdated.OldQuantity)
+            );
     }
 }
