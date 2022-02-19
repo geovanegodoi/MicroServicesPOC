@@ -30,7 +30,7 @@
   </ol>
 
 
-
+&nbsp;
 <!--------------------------------------------------------------------------------------------------------->
 <!-- ABOUT THE PROJECT ------------------------------------------------------------------------------------>
 <!--------------------------------------------------------------------------------------------------------->
@@ -60,11 +60,10 @@ This section should list any major frameworks/libraries used to bootstrap the pr
 * [Xabaril/HealthChecks](https://github.com/Xabaril/AspNetCore.Diagnostics.HealthChecks/)
 
 
-
+&nbsp;
 <!--------------------------------------------------------------------------------------------------------->
 <!-- GETTING STARTED -------------------------------------------------------------------------------------->
 <!--------------------------------------------------------------------------------------------------------->
-
 ## Getting Started
 
 We are using in this project a docker compose file in order to simplify the steps related with build and deploy all the microservices, as well as, the setup and exection all the infrastructure resources such as the databases and rabbitmq.
@@ -89,7 +88,7 @@ After executing we are gonna see that all the containers have been started, crea
 ![docker ps](/images/docker-ps.png)
 
 
-
+&nbsp;
 <!--------------------------------------------------------------------------------------------------------->
 <!--- CATALOG MICROSERVICE -------------------------------------------------------------------------------->
 <!--------------------------------------------------------------------------------------------------------->
@@ -100,6 +99,11 @@ Service responsible for the catalog items context, including all the catalog ite
 ![Catalog Microservice](/images/swagger-catalog-service.png)
 
 ### Catalog Events
+
+This microservice uses the **MassTransit** lib in order to implement the [pub/sub pattern](https://docs.microsoft.com/en-us/azure/architecture/patterns/publisher-subscriber) for the releated events, accordingly the official documentation available in the following links :
+
+* [MassTransit Publisher](https://masstransit-project.com/usage/producers.html#publish)
+* [MassTransit Consumer](https://masstransit-project.com/usage/consumers.html#consumers)
 
 | Syntax                      | Type          | Description                                                                   |
 | --------------------------- | ------------- | ----------------------------------------------------------------------------- |
@@ -113,10 +117,14 @@ Service responsible for the catalog items context, including all the catalog ite
 
 ### Catalog Events Diagram
 
+Accordingly the [RabbitMQ official documentation](https://www.rabbitmq.com/tutorials/amqp-concepts.html#exchanges), a message is never sent directly to a queue, it is sent to an exchange instead, which is a routing object, thus there is the **Primary Exchange**.
+
+In order to implement the **pub/sub pattern** MassTransit creates the **Secondary Exchange**, which is bind to a destination queue, and there are individual queues for each published event and subscribed consumer.
+
 ![Catalog Events Diagram](/images/catalog-events-diagram.png)
 
 
-
+&nbsp;
 <!--------------------------------------------------------------------------------------------------------->
 <!--- CUSTOMER MICROSERVICE ------------------------------------------------------------------------------->
 <!--------------------------------------------------------------------------------------------------------->
@@ -127,6 +135,11 @@ Service responsible for the customer context, including all the customers manage
 ![Customer Microservice](/images/swagger-customer-service.png)
 
 ### Customer Events
+
+This microservice uses the **MassTransit** lib in order to implement the [pub/sub pattern](https://docs.microsoft.com/en-us/azure/architecture/patterns/publisher-subscriber) for the releated events, accordingly the official documentation available in the following links :
+
+* [MassTransit Publisher](https://masstransit-project.com/usage/producers.html#publish)
+* [MassTransit Consumer](https://masstransit-project.com/usage/consumers.html#consumers)
 
 | Syntax                      | Type          | Description                                                                   |
 | --------------------------- | ------------- | ----------------------------------------------------------------------------- |
@@ -139,10 +152,14 @@ Service responsible for the customer context, including all the customers manage
 
 ### Customer Events Diagram
 
+Accordingly the [RabbitMQ official documentation](https://www.rabbitmq.com/tutorials/amqp-concepts.html#exchanges), a message is never sent directly to a queue, it is sent to an exchange instead, which is a routing object, thus there is the **Primary Exchange**.
+
+In order to implement the **pub/sub pattern** MassTransit creates the **Secondary Exchange**, which is bind to a destination queue, and there are individual queues for each published event and subscribed consumer.
+
 ![Customer Events Diagram](/images/customer-events-diagram.png)
 
 
-
+&nbsp;
 <!--------------------------------------------------------------------------------------------------------->
 <!--- ORDER MICROSERVICE ---------------------------------------------------------------------------------->
 <!--------------------------------------------------------------------------------------------------------->
@@ -153,6 +170,11 @@ Service responsible for the order context, including all the orders management, 
 ![Order Microservice](/images/swagger-order-service.png)
 
 ### Order Events
+
+This microservice uses the **MassTransit** lib in order to implement the [pub/sub pattern](https://docs.microsoft.com/en-us/azure/architecture/patterns/publisher-subscriber) for the releated events, accordingly the official documentation available in the following links :
+
+* [MassTransit Publisher](https://masstransit-project.com/usage/producers.html#publish)
+* [MassTransit Consumer](https://masstransit-project.com/usage/consumers.html#consumers)
 
 | Syntax                      | Type          | Description                                                                       |
 | --------------------------- | ------------- | --------------------------------------------------------------------------------- |
@@ -169,6 +191,10 @@ Service responsible for the order context, including all the orders management, 
 (*) Within this microservice we are using a database for catalog and customer, but the difference from the original ones, is that within the order context these entities are simplified, only storaging the minimal data consumed by order microservice.
 
 ### Order Events Diagram
+
+Accordingly the [RabbitMQ official documentation](https://www.rabbitmq.com/tutorials/amqp-concepts.html#exchanges), a message is never sent directly to a queue, it is sent to an exchange instead, which is a routing object, thus there is the **Primary Exchange**.
+
+In order to implement the **pub/sub pattern** MassTransit creates the **Secondary Exchange**, which is bind to a destination queue, and there are individual queues for each published event and subscribed consumer.
 
 ![Order Events Diagram](/images/order-events-diagram.png)
 
