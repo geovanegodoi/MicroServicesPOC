@@ -11,17 +11,20 @@
     <li>
       <a href="#catalog-microservice">Catalog Microservice</a>
       <ul>
-        <li><a href="#catalog-events-related">Catalog Events Related</a></li>
+        <li><a href="#catalog-events">Catalog Events</a></li>
+        <li><a href="#catalog-events-diagram">Catalog Events Diagram</a></li>
       </ul>
     </li>
     <li><a href="#customer-microservice">Customer Microservice</a>
       <ul>
-        <li><a href="#customer-events-related">Customer Events Related</a></li>
+        <li><a href="#customer-events">Customer Events</a></li>
+        <li><a href="#customer-events-diagram">Customer Events Diagram</a></li>        
       </ul>
     </li>
     <li><a href="#order-microservice">Order Microservice</a>
       <ul>
-        <li><a href="#order-events-related">Order Events Related</a></li>
+        <li><a href="#order-events">Order Events</a></li>
+        <li><a href="#order-events-diagram">Order Events Diagram</a></li>        
       </ul>    
     </li>
   </ol>
@@ -96,7 +99,7 @@ Service responsible for the catalog items context, including all the catalog ite
 
 ![Catalog Microservice](/images/swagger-catalog-service.png)
 
-### Catalog Events Related
+### Catalog Events
 
 | Syntax                      | Type          | Description                                                                   |
 | --------------------------- | ------------- | ----------------------------------------------------------------------------- |
@@ -107,6 +110,10 @@ Service responsible for the catalog items context, including all the catalog ite
 | **OrderCreated**            | Consumed      | When a new order is **created**, the catalog item quantity is **subtracted**  |
 | **OrderUpdated**            | Consumed      | When an order is **update**, the catalog item quantity is **updated**         |
 | **OrderRemoved**            | Consumed      | When an order is **delete**, the catalog item quantity is **incremented**     |
+
+### Catalog Events Diagram
+
+![Catalog Events Diagram](/images/catalog-events-diagram.png)
 
 
 
@@ -119,7 +126,7 @@ Service responsible for the customer context, including all the customers manage
 
 ![Customer Microservice](/images/swagger-customer-service.png)
 
-### Customer Events Related
+### Customer Events
 
 | Syntax                      | Type          | Description                                                                   |
 | --------------------------- | ------------- | ----------------------------------------------------------------------------- |
@@ -130,6 +137,9 @@ Service responsible for the customer context, including all the customers manage
 | **OrderUpdated**            | Consumed      | When an order is **update**, the customer order history is **updated**        |
 | **OrderDeleted**            | Consumed      | When an order is **delete**, the customer order history is **deleted**        |
 
+### Customer Events Diagram
+
+![Customer Events Diagram](/images/customer-events-diagram.png)
 
 
 
@@ -142,7 +152,7 @@ Service responsible for the order context, including all the orders management, 
 
 ![Order Microservice](/images/swagger-order-service.png)
 
-### Order Events Related
+### Order Events
 
 | Syntax                      | Type          | Description                                                                       |
 | --------------------------- | ------------- | --------------------------------------------------------------------------------- |
@@ -157,6 +167,10 @@ Service responsible for the order context, including all the orders management, 
 | **CustomerDeleted**         | Consumed      | When a customer is **deleted**, the local customer registry is **deleted**        |
 
 (*) Within this microservice we are using a database for catalog and customer, but the difference from the original ones, is that within the order context these entities are simplified, only storaging the minimal data consumed by order microservice.
+
+### Order Events Diagram
+
+![Order Events Diagram](/images/order-events-diagram.png)
 
 
 
