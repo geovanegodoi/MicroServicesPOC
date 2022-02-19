@@ -28,7 +28,7 @@ namespace MSPOC.Order.Service.Mappers.Extensions
                 order.CalculateOrderTotalPrice(),
                 order.CreatedDate,
                 order.DeliveryDate,
-                order.OrderItems.AsOrderItemEventCollection()
+                null
             );
 
         public static OrderRemoved AsOrderRemoved(this Entity.Order order)

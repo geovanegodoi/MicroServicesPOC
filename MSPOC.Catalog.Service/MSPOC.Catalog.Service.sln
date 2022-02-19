@@ -1,0 +1,33 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30114.105
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MSPOC.Catalog.Service", "src\MSPOC.Catalog.Service.csproj", "{162CE6E0-D30A-4333-8F20-DA66840A2CCB}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{495F7E3A-8587-4B00-ABB3-0046453D895D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MSPOC.Catalog.Service.UnitTest", "test\MSPOC.Catalog.Service.UnitTest\MSPOC.Catalog.Service.UnitTest.csproj", "{9B4CE591-E1EE-40AA-9754-1628730FA5C2}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{162CE6E0-D30A-4333-8F20-DA66840A2CCB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{162CE6E0-D30A-4333-8F20-DA66840A2CCB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{162CE6E0-D30A-4333-8F20-DA66840A2CCB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{162CE6E0-D30A-4333-8F20-DA66840A2CCB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9B4CE591-E1EE-40AA-9754-1628730FA5C2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9B4CE591-E1EE-40AA-9754-1628730FA5C2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9B4CE591-E1EE-40AA-9754-1628730FA5C2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9B4CE591-E1EE-40AA-9754-1628730FA5C2}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{9B4CE591-E1EE-40AA-9754-1628730FA5C2} = {495F7E3A-8587-4B00-ABB3-0046453D895D}
+	EndGlobalSection
+EndGlobal

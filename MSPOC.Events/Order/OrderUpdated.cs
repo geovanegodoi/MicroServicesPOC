@@ -11,6 +11,6 @@ namespace MSPOC.Events.Order
         decimal TotalPrice, 
         DateTimeOffset OrderedDate, 
         DateTimeOffset DeliveryDate, 
-        IEnumerable<OrderItemEvent> OrderItems
+        IEnumerable<OrderItemUpdatedEvent> OrderItems
     );
 }
