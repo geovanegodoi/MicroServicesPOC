@@ -1,6 +1,36 @@
-# Micro Services POC
+<!-- TABLE OF CONTENTS -->
+## Table of Contents
+  <ol>
+    <li>
+      <a href="#about-the-project">About The Project</a>
+      <ul>
+        <li><a href="#built-with">Built With</a></li>
+      </ul>
+    </li>
+    <li><a href="#getting-started">Getting Started</a></li>
+    <li>
+      <a href="#catalog-microservice">Catalog Microservice</a>
+      <ul>
+        <li><a href="#catalog-events-related">Catalog Events Related</a></li>
+      </ul>
+    </li>
+    <li><a href="#customer-microservice">Customer Microservice</a>
+      <ul>
+        <li><a href="#customer-events-related">Customer Events Related</a></li>
+      </ul>
+    </li>
+    <li><a href="#order-microservice">Order Microservice</a>
+      <ul>
+        <li><a href="#order-events-related">Order Events Related</a></li>
+      </ul>    
+    </li>
+  </ol>
 
-<!-- ABOUT THE PROJECT -->
+
+
+<!--------------------------------------------------------------------------------------------------------->
+<!-- ABOUT THE PROJECT ------------------------------------------------------------------------------------>
+<!--------------------------------------------------------------------------------------------------------->
 ## About The Project
 
 This is a simple proof of concept (POC) to introduce and verify some challenges redarging Microservices Architecture.
@@ -9,7 +39,11 @@ This is a simple proof of concept (POC) to introduce and verify some challenges 
 
 The main concept within this project is to implement an enviroment with some microservices in a context of an inventory system, however for this first release there are only 3 microservices, **Catalog Microservice**, **Customer Microservice** and **Order Microservice**, each one with its own database instance and the inter-communication between them happens only through asyncronous events.
 
-<!-- BUILT WITH -->
+
+
+<!--------------------------------------------------------------------------------------------------------->
+<!-- BUILT WITH ------------------------------------------------------------------------------------------->
+<!--------------------------------------------------------------------------------------------------------->
 ### Built With
 
 This section should list any major frameworks/libraries used to bootstrap the project.
@@ -24,7 +58,10 @@ This section should list any major frameworks/libraries used to bootstrap the pr
 
 
 
-<!-- GETTING STARTED -->
+<!--------------------------------------------------------------------------------------------------------->
+<!-- GETTING STARTED -------------------------------------------------------------------------------------->
+<!--------------------------------------------------------------------------------------------------------->
+
 ## Getting Started
 
 We are using in this project a docker compose file in order to simplify the steps related with build and deploy all the microservices, as well as, the setup and exection all the infrastructure resources such as the databases and rabbitmq.
@@ -48,33 +85,81 @@ After executing we are gonna see that all the containers have been started, crea
 
 ![docker ps](/images/docker-ps.png)
 
+
+
+<!--------------------------------------------------------------------------------------------------------->
+<!--- CATALOG MICROSERVICE -------------------------------------------------------------------------------->
+<!--------------------------------------------------------------------------------------------------------->
 ## Catalog Microservice
 
 Service responsible for the catalog items context, including all the catalog items management, such as enrollment, update and deletion.
 
 ![Catalog Microservice](/images/swagger-catalog-service.png)
 
-### Events Related
+### Catalog Events Related
 
 | Syntax                      | Type          | Description                                                                   |
 | --------------------------- | ------------- | ----------------------------------------------------------------------------- |
 | **CatalogItemCreated**      | Published     | When a new catalog item is **created**                                        |
-| **CatalogItemUpdated**      | Published     | When a new catalog item is **updated**                                        |
-| **CatalogItemDeleted**      | Published     | When a new catalog item is **deleted**                                        |
+| **CatalogItemUpdated**      | Published     | When a catalog item is **updated**                                            |
+| **CatalogItemDeleted**      | Published     | When a catalog item is **deleted**                                            |
 | **CatalogItemLowQuantity**  | Published     | When a catalog item quantity reachs out the quantity of 10 units              |
 | **OrderCreated**            | Consumed      | When a new order is **created**, the catalog item quantity is **subtracted**  |
-| **OrderUpdated**            | Consumed      | When a new order is **update**, the catalog item quantity is **updated**      |
-| **OrderDeleted**            | Consumed      | When a new order is **delete**, the catalog item quantity is **incremented**  |
+| **OrderUpdated**            | Consumed      | When an order is **update**, the catalog item quantity is **updated**         |
+| **OrderRemoved**            | Consumed      | When an order is **delete**, the catalog item quantity is **incremented**     |
 
 
-### Catalog Microservice
+
+<!--------------------------------------------------------------------------------------------------------->
+<!--- CUSTOMER MICROSERVICE ------------------------------------------------------------------------------->
+<!--------------------------------------------------------------------------------------------------------->
+## Customer Microservice
 
 Service responsible for the customer context, including all the customers management, such as enrollment, update and deletion.
 
 ![Customer Microservice](/images/swagger-customer-service.png)
 
-### Order Microservice
+### Customer Events Related
+
+| Syntax                      | Type          | Description                                                                   |
+| --------------------------- | ------------- | ----------------------------------------------------------------------------- |
+| **CustomerCreated**         | Published     | When a new customer is **created**                                            |
+| **CustomerUpdated**         | Published     | When a customer is **updated**                                                |
+| **CustomerDeleted**         | Published     | When a customer is **deleted**                                                |
+| **OrderCreated**            | Consumed      | When a new order is **created**, the customer order history is **created**    |
+| **OrderUpdated**            | Consumed      | When an order is **update**, the customer order history is **updated**        |
+| **OrderDeleted**            | Consumed      | When an order is **delete**, the customer order history is **deleted**        |
+
+
+
+
+<!--------------------------------------------------------------------------------------------------------->
+<!--- ORDER MICROSERVICE ---------------------------------------------------------------------------------->
+<!--------------------------------------------------------------------------------------------------------->
+## Order Microservice
 
 Service responsible for the order context, including all the orders management, such as enrollment, update and deletion.
 
 ![Order Microservice](/images/swagger-order-service.png)
+
+### Order Events Related
+
+| Syntax                      | Type          | Description                                                                       |
+| --------------------------- | ------------- | --------------------------------------------------------------------------------- |
+| **OrderCreated**            | Published     | When a new order is **created**                                                   |
+| **OrderUpdated**            | Published     | When an order is **updated**                                                      |
+| **OrderDeleted**            | Published     | When an order is **deleted**                                                      |
+| **CatalogItemCreated**      | Consumed      | When a new catalog item is **created**, the local catalog registry is **created** |
+| **CatalogItemUpdated**      | Consumed      | When a catalog item is **updated**, the local catalog registry is **updated**     |
+| **CatalogItemDeleted**      | Consumed      | When a catalog item is **deleted**, the local catalog registry is **deleted**     |
+| **CustomerCreated**         | Consumed      | When a new customer is **created**, the local customer registry is **created**    |
+| **CustomerUpdated**         | Consumed      | When a customer is **updated**, the local customer registry is **updated**        |
+| **CustomerDeleted**         | Consumed      | When a customer is **deleted**, the local customer registry is **deleted**        |
+
+(*) Within this microservice we are using a database for catalog and customer, but the difference from the original ones, is that within the order context these entities are simplified, only storaging the minimal data consumed by order microservice.
+
+
+
+<!--------------------------------------------------------------------------------------------------------->
+<!--- EVENTS AND QUEUES ARCHITECTURE ---------------------------------------------------------------------->
+<!--------------------------------------------------------------------------------------------------------->
