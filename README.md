@@ -1,3 +1,5 @@
+<div id="top"></div>
+
 <!-- TABLE OF CONTENTS -->
 ## Table of Contents
   <ol>
@@ -27,6 +29,7 @@
         <li><a href="#order-events-diagram">Order Events Diagram</a></li>        
       </ul>    
     </li>
+    <li><a href="#healthcheck-service">Healthcheck Service</a></li>  
   </ol>
 
 
@@ -59,6 +62,8 @@ This section should list any major frameworks/libraries used to bootstrap the pr
 * [Automapper](https://automapper.org/)
 * [Xabaril/HealthChecks](https://github.com/Xabaril/AspNetCore.Diagnostics.HealthChecks/)
 
+<p align="right">[ <a href="#top">back to top</a> ]</p>
+
 
 &nbsp;
 <!--------------------------------------------------------------------------------------------------------->
@@ -87,6 +92,8 @@ After executing we are gonna see that all the containers have been started, crea
 
 ![docker ps](/images/docker-ps.png)
 
+<p align="right">[ <a href="#top">back to top</a> ]</p>
+
 
 &nbsp;
 <!--------------------------------------------------------------------------------------------------------->
@@ -96,11 +103,13 @@ After executing we are gonna see that all the containers have been started, crea
 
 Service responsible for the catalog items context, including all the catalog items management, such as enrollment, update and deletion.
 
+When running locally, this microservice's API is available at the following address *http://localhost:5000*.
+
 ![Catalog Microservice](/images/swagger-catalog-service.png)
 
 ### Catalog Events
 
-This microservice uses the **MassTransit** lib in order to implement the [pub/sub pattern](https://docs.microsoft.com/en-us/azure/architecture/patterns/publisher-subscriber) for the releated events, accordingly the official documentation available in the following links :
+This microservice uses the [MassTransit](https://masstransit-project.com/) lib in order to implement the [pub/sub pattern](https://docs.microsoft.com/en-us/azure/architecture/patterns/publisher-subscriber) for the releated events, accordingly the official documentation available in the following links :
 
 * [MassTransit Publisher](https://masstransit-project.com/usage/producers.html#publish)
 * [MassTransit Consumer](https://masstransit-project.com/usage/consumers.html#consumers)
@@ -123,6 +132,8 @@ In order to implement the **pub/sub pattern** MassTransit creates the **Secondar
 
 ![Catalog Events Diagram](/images/catalog-events-diagram.png)
 
+<p align="right">[ <a href="#top">back to top</a> ]</p>
+
 
 &nbsp;
 <!--------------------------------------------------------------------------------------------------------->
@@ -132,11 +143,13 @@ In order to implement the **pub/sub pattern** MassTransit creates the **Secondar
 
 Service responsible for the customer context, including all the customers management, such as enrollment, update and deletion.
 
+When running locally, this microservice's API is available at the following address *http://localhost:5001*.
+
 ![Customer Microservice](/images/swagger-customer-service.png)
 
 ### Customer Events
 
-This microservice uses the **MassTransit** lib in order to implement the [pub/sub pattern](https://docs.microsoft.com/en-us/azure/architecture/patterns/publisher-subscriber) for the releated events, accordingly the official documentation available in the following links :
+This microservice uses the [MassTransit](https://masstransit-project.com/) lib in order to implement the [pub/sub pattern](https://docs.microsoft.com/en-us/azure/architecture/patterns/publisher-subscriber) for the releated events, accordingly the official documentation available in the following links :
 
 * [MassTransit Publisher](https://masstransit-project.com/usage/producers.html#publish)
 * [MassTransit Consumer](https://masstransit-project.com/usage/consumers.html#consumers)
@@ -158,6 +171,8 @@ In order to implement the **pub/sub pattern** MassTransit creates the **Secondar
 
 ![Customer Events Diagram](/images/customer-events-diagram.png)
 
+<p align="right">[ <a href="#top">back to top</a> ]</p>
+
 
 &nbsp;
 <!--------------------------------------------------------------------------------------------------------->
@@ -167,11 +182,13 @@ In order to implement the **pub/sub pattern** MassTransit creates the **Secondar
 
 Service responsible for the order context, including all the orders management, such as enrollment, update and deletion.
 
+When running locally, this microservice's API is available at the following address *http://localhost:5002*.
+
 ![Order Microservice](/images/swagger-order-service.png)
 
 ### Order Events
 
-This microservice uses the **MassTransit** lib in order to implement the [pub/sub pattern](https://docs.microsoft.com/en-us/azure/architecture/patterns/publisher-subscriber) for the releated events, accordingly the official documentation available in the following links :
+This microservice uses the [MassTransit](https://masstransit-project.com/) lib in order to implement the [pub/sub pattern](https://docs.microsoft.com/en-us/azure/architecture/patterns/publisher-subscriber) for the releated events, accordingly the official documentation available in the following links :
 
 * [MassTransit Publisher](https://masstransit-project.com/usage/producers.html#publish)
 * [MassTransit Consumer](https://masstransit-project.com/usage/consumers.html#consumers)
@@ -198,8 +215,18 @@ In order to implement the **pub/sub pattern** MassTransit creates the **Secondar
 
 ![Order Events Diagram](/images/order-events-diagram.png)
 
+<p align="right">[ <a href="#top">back to top</a> ]</p>
+
 
 
 <!--------------------------------------------------------------------------------------------------------->
-<!--- EVENTS AND QUEUES ARCHITECTURE ---------------------------------------------------------------------->
+<!--- HEALTHCHECK SERVICE --------------------------------------------------------------------------------->
 <!--------------------------------------------------------------------------------------------------------->
+## Healthcheck Service
+
+To monitor the microservices health, it is been used the [Xabaril/HealthChecks](https://github.com/Xabaril/AspNetCore.Diagnostics.HealthChecks/) lin. It provides tools to monitor the microservice as well as its dependencies, such as the database and the message broker, so we are monitoring the health of mongo and rabbitmq. 
+
+It also provides a friendly dashboard where is presented all the monitoring information in real-time, as featured in the image below. When running locally, this dashboard is available at the following address http://localhost:8080/healthchecks-ui.
+
+![Healthcheck Service](/images/healthcheck-service.png)
+
