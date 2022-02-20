@@ -7,6 +7,7 @@
       <a href="#about-the-project">About The Project</a>
       <ul>
         <li><a href="#built-with">Built With</a></li>
+        <li><a href="#project-folder-structure">Project Folder Structure</a></li>
       </ul>
     </li>
     <li><a href="#getting-started">Getting Started</a></li>
@@ -46,7 +47,7 @@ This is a simple proof of concept (POC) to introduce and verify some challenges 
 The main concept within this project is to implement an enviroment with some microservices in a context of an inventory system, however for this first release there are only 3 microservices, **Catalog Microservice**, **Customer Microservice** and **Order Microservice**, each one with its own database instance and the inter-communication between them happens only through asyncronous events.
 
 
-
+&nbsp;
 <!--------------------------------------------------------------------------------------------------------->
 <!-- BUILT WITH ------------------------------------------------------------------------------------------->
 <!--------------------------------------------------------------------------------------------------------->
@@ -61,6 +62,56 @@ This section should list any major frameworks/libraries used to bootstrap the pr
 * [Docker](https://www.docker.com/get-started/)
 * [Automapper](https://automapper.org/)
 * [Xabaril/HealthChecks](https://github.com/Xabaril/AspNetCore.Diagnostics.HealthChecks/)
+
+<p align="right">[ <a href="#top">back to top</a> ]</p>
+
+
+&nbsp;
+<!--------------------------------------------------------------------------------------------------------->
+<!-- PROJECT FOLDERS STRUCTURE ---------------------------------------------------------------------------->
+<!--------------------------------------------------------------------------------------------------------->
+### Project Folder Structure
+```
+root
+|
+└── docker-compose.yml
+└── MSPOC.Catalog.Service
+|   └── MSPOC.Catalog.Service.sln
+|   └── src
+|   |   └── MSPOC.Catalog.Service.csproj (WebAPI net5.0)
+|   |   └── Dockerfile
+|   |   └── .dockerignore
+|   |   └── nuget.config
+|   └── test
+|       └── MSPOC.Catalog.Service.UnitTest.csproj (xUnit)
+|
+└── MSPOC.CrossCutting
+|   └── MSPOC.CrossCutting.Service.csproj (ClassLib net5.0)
+|
+└── MSPOC.Customer.Service
+|   └── MSPOC.Customer.Service.sln
+|   └── src
+|   |   └── MSPOC.Customer.Service.csproj (WebAPI net5.0)
+|   |   └── Dockerfile
+|   |   └── .dockerignore
+|   |   └── nuget.config
+|   └── test
+|       └── MSPOC.Customer.Service.UnitTest.csproj (xUnit)
+|
+└── MSPOC.Events
+|   └── MSPOC.Events.Service.csproj (ClassLib net5.0)
+|  
+└── MSPOC.Order.Service
+|   └── MSPOC.Order.Service.sln
+|   └── src
+|   |   └── MSPOC.Order.Service.csproj (WebAPI net5.0)
+|   |   └── Dockerfile
+|   |   └── .dockerignore
+|   |   └── nuget.config
+|   └── test
+|       └── MSPOC.Order.Service.UnitTest.csproj (xUnit)        
+|
+```
 
 <p align="right">[ <a href="#top">back to top</a> ]</p>
 
