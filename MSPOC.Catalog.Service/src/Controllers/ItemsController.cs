@@ -24,11 +24,5 @@ namespace MSPOC.Catalog.Service.Controllers
         public ItemsController(IMapper mapper, IRepository<Item> itemsRepository, IPublishEndpoint publishEndpoint)
             : base(mapper, baseRepository: itemsRepository, baseEndpoint: publishEndpoint)
         {}
-
-        [HttpPut("{id}")]
-        public override Task<IActionResult> PutAsync([FromRoute] Guid id, [FromBody] CreateEditItemDTO dto)
-        {
-            return base.PutAsync(id, dto);
-        }
     }
 }
