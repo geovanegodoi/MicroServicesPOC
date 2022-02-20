@@ -38,6 +38,7 @@ namespace MSPOC.Customer.Service.Controllers
             if (existingEntity.Address is null) existingEntity.Address = new Entity.CustomerAddress();
             _baseMapper.Map(customerAddressDTO, existingEntity.Address);
             await _baseRepository.UpdateAsync(existingEntity);
+            await base.PublishEvent<Entities.Customer, CustomerUpdated>(existingEntity);
 
             return NoContent();
         }
