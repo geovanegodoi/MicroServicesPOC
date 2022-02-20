@@ -10,22 +10,21 @@ using Xunit;
 
 namespace MSPOC.Catalog.Service.UnitTest.Consumers
 {
-
-    public class OrderCreatedConsumerTests : OrderEventsConsumerTestsBase<OrderCreated>
+    public class OrderDeletedConsumerTests : OrderEventsConsumerTestsBase<OrderRemoved>
     {
-        private readonly OrderCreatedConsumer _sut;
+        private readonly OrderDeletedConsumer _sut;
 
-        public OrderCreatedConsumerTests()
+        public OrderDeletedConsumerTests()
         {
-            _sut = new OrderCreatedConsumer(_repositoryMock, _publisherMock);
+            _sut = new OrderDeletedConsumer(_repositoryMock, _publisherMock);
         }
 
         [Fact]
-        public async Task Consume_OrderCreated_SubtractItemQuantity()
+        public async Task Consume_OrderRemoved_AddItemQuantity()
         {
             // Arrange
             var (orderEvent, catalogItem) = NewEventAndItem();
-            var expectedItemQuantity = GetExpectedSubtractedQuantity(orderEvent, catalogItem);
+            var expectedItemQuantity = GetExpectedAddedQuantity(orderEvent, catalogItem);
             _consumeContextMock.Message.Returns(orderEvent);
             _repositoryMock.GetAsync(default).ReturnsForAnyArgs(catalogItem);
 
@@ -37,11 +36,11 @@ namespace MSPOC.Catalog.Service.UnitTest.Consumers
         }
 
         [Fact]
-        public async Task Consume_ItemUnderMinimumQuantity_NotifyLowQuantityItem()
+        public async Task Consume_ItemUnderMinimumQuantity_ShouldNotifyLowQuantityItem()
         {
             // Arrange
             var (orderEvent, catalogItem) = NewEventAndItem();
-            catalogItem.Quantity = ITEM_MINIMUM_QUANTITY;
+            catalogItem.Quantity = ITEM_MINIMUM_QUANTITY - 5;
             _consumeContextMock.Message.Returns(orderEvent);
             _repositoryMock.GetAsync(default).ReturnsForAnyArgs(catalogItem);
 
@@ -53,11 +52,11 @@ namespace MSPOC.Catalog.Service.UnitTest.Consumers
         }
 
         [Fact]
-        public async Task Consume_ItemAboveMinimumQuantity_NotNotifyLowQuantityItem()
+        public async Task Consume_ItemAboveMinimumQuantity_ShouldNotNotifyLowQuantityItem()
         {
             // Arrange
             var (orderEvent, catalogItem) = NewEventAndItem();
-            catalogItem.Quantity = ITEM_MINIMUM_QUANTITY + 10;
+            catalogItem.Quantity = ITEM_MINIMUM_QUANTITY + 5;
             _consumeContextMock.Message.Returns(orderEvent);
             _repositoryMock.GetAsync(default).ReturnsForAnyArgs(catalogItem);
 
@@ -67,26 +66,23 @@ namespace MSPOC.Catalog.Service.UnitTest.Consumers
             // Assert
             VerifyPublishedItemLowQuantityEvent(catalogItem, expectedEvents: 0);
         }
+        
+        private (OrderRemoved orderEvent, Entities.Item item) NewEventAndItem()
+            => (NewOrderRemoved(), NewItem());
 
-        private (OrderCreated orderEvent, Entities.Item item) NewEventAndItem()
-            => (NewOrderCreated(), NewItem());
-
-        private OrderCreated NewOrderCreated()
-            => new Faker<OrderCreated>()
-            .CustomInstantiator(f => new OrderCreated
+        private OrderRemoved NewOrderRemoved()
+            => new Faker<OrderRemoved>()
+            .CustomInstantiator(f => new OrderRemoved
             (
                 OrderId      : f.Random.Guid(), 
                 CustomerId   : f.Random.Guid(), 
-                Description  : f.Random.Word(), 
-                TotalPrice   : f.Random.Decimal(), 
-                OrderedDate  : f.Date.PastOffset(), 
-                DeliveryDate : f.Date.FutureOffset(), 
                 OrderItems   : NewOrderItemEvents()
             ));
-        private int GetExpectedSubtractedQuantity(OrderCreated orderEvent, Entities.Item item)
+
+        private int GetExpectedAddedQuantity(OrderRemoved orderEvent, Entities.Item item)
         {
             var orderItem = orderEvent.OrderItems.FirstOrDefault();
-            return (item.Quantity - orderItem.Quantity);
+            return (item.Quantity + orderItem.Quantity);
         }
     }
 }
