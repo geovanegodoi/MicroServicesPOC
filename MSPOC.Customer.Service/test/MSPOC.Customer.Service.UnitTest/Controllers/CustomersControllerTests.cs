@@ -34,7 +34,7 @@ namespace MSPOC.Customer.Service.UnitTest.Controllers
         }
 
         [Fact]
-        public async Task GetByIdAsync_CustomerExist_Return20Ok()
+        public async Task GetByIdAsync_CustomerExist_Return200Ok()
         {
             // Arrange
             var customer = NewCustomer();
@@ -178,19 +178,6 @@ namespace MSPOC.Customer.Service.UnitTest.Controllers
             // Assert
             (result.Result as OkObjectResult).StatusCode.Should().Be(200);
         }
-
-        /*
-        public async Task<ActionResult<CustomerAddressDTO>> UpdateCustomerAddressAsync([FromRoute]Guid customerId, [FromBody]CreateEditCustomerAddressDTO customerAddressDTO)
-        {
-            var existingEntity = await _baseRepository.GetAsync(customerId);
-            if (existingEntity is null) return NotFound();
-            if (existingEntity.Address is null) existingEntity.Address = new Entity.CustomerAddress();
-            _baseMapper.Map(customerAddressDTO, existingEntity.Address);
-            await _baseRepository.UpdateAsync(existingEntity);
-
-            return NoContent();
-        }
-        */
 
         [Fact]
         public async Task UpdateCustomerAddressAsync_CustomerNotExist_Return404NotFound()

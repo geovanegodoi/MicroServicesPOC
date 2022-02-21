@@ -111,17 +111,105 @@ namespace MSPOC.Order.Service.UnitTest.Controllers
             // Arrange
             SetupExistingCustomerAndItem();
             var createDTO    = NewCreateEditOrderDTO();
-            var order        = NewOrder();
-            var orderDTO     = MapToOrderDTO(order);
+            var order        = SetupOrderNotExist(createDTO);
             var orderCreated = MapToOrderCreated(order);
-            _mapperMock.Map<Entities.Order>(createDTO).Returns(order);
-            _mapperMock.Map<OrderDTO>(order).Returns(orderDTO);
 
             // Act
             await _sut.PostAsync(createDTO);
         
             // Assert
             _publisherMock.ReceivedWithAnyArgs(1).Publish<OrderCreated>(orderCreated);
+        }
+
+        [Fact]
+        public async Task PutAsync_CustomerNotExist_Return400BadRequest()
+        {
+            // Arrange
+            var editDTO = NewCreateEditOrderDTO();
+            Entities.Customer customerNotExist = null;
+            _customerRepositoryMock.GetAsync(default).Returns(customerNotExist);
+
+            // Act
+            var action = await _sut.PutAsync(Guid.NewGuid(), editDTO);
+
+            // Assert
+            (action as BadRequestObjectResult).StatusCode.Should().Be(400);
+        }
+
+        [Fact]
+        public async Task PutAsync_ItemNotExist_Return400BadRequest()
+        {
+            // Arrange
+            var editDTO = NewCreateEditOrderDTO();
+            Entities.CatalogItem itemNotExist = null;
+            _itemRepositoryMock.GetAsync(default).Returns(itemNotExist);
+
+            // Act
+            var action = await _sut.PutAsync(Guid.NewGuid(), editDTO);
+
+            // Assert
+            (action as BadRequestObjectResult).StatusCode.Should().Be(400);
+        }
+
+        [Fact]
+        public async Task PutAsync_OrderNotExist_Return404NotFound()
+        {
+            // Arrange
+            SetupExistingCustomerAndItem();
+            var editDTO = NewCreateEditOrderDTO();
+            Entities.Order orderNotExist = null;
+            _orderRepositoryMock.GetAsync(default).Returns(orderNotExist);
+
+            // Act
+            var action = await _sut.PutAsync(Guid.NewGuid(), editDTO);
+        
+            // Assert
+            (action as NotFoundObjectResult).StatusCode.Should().Be(404);
+        }
+
+        [Fact]
+        public async Task PutAsync_OrderExist_PublishOrderUpdatedEvent()
+        {
+            // Arrange
+            SetupExistingCustomerAndItem();
+            var editDTO      = NewCreateEditOrderDTO();
+            var order        = SetupOrderExist(editDTO);
+            var orderUpdated = MapToOrderUpdated(order);
+
+            // Act
+            await _sut.PutAsync(order.Id, editDTO);
+        
+            // Assert
+            _publisherMock.ReceivedWithAnyArgs(1).Publish<OrderUpdated>(orderUpdated);
+        }
+
+        [Fact]
+        public async Task DeleteAsync_OrderNotExist_Return404NotFound()
+        {
+            // Arrange
+            Entities.Order orderNotExist = null;
+            _orderRepositoryMock.GetAsync(default).Returns(orderNotExist);
+        
+            // Act
+            var result = await _sut.DeleteAsync(Guid.NewGuid());
+        
+            // Assert
+            (result as NotFoundResult).StatusCode.Should().Be(404);
+        }
+
+        [Fact]
+        public async Task DeleteAsync_OrderExist_PublishOrderRemovedEvent()
+        {
+            // Arrange
+            var order        = NewOrder();
+            var orderRemoved = MapToOrderRemoved(order);
+            _orderRepositoryMock.GetAsync(order.Id).Returns(order);
+
+            // Act
+            await _sut.DeleteAsync(order.Id);
+        
+            // Assert
+            _publisherMock.ReceivedWithAnyArgs(1).Publish<OrderRemoved>(orderRemoved);
         }
 
         private void SetupExistingCustomerAndItem()
@@ -133,115 +221,24 @@ namespace MSPOC.Order.Service.UnitTest.Controllers
             _itemRepositoryMock.GetAsync(default).ReturnsForAnyArgs(catalogItem);
         }
 
-        // [Fact]
-        // public async Task PutAsync_CustomerNotExist_Return404NotFound()
-        // {
-        //     // Arrange
-        //     var updateDTO = NewCreateEditCustomerDTO();
-        //     Entities.Customer customerNotFound = null;
-        //     _repositoryMock.GetAsync(default).Returns(customerNotFound);
+        private Entities.Order SetupOrderNotExist(CreateEditOrderDTO createEditDTO)
+        {
+            var order    = NewOrder();
+            var orderDTO = MapToOrderDTO(order);
+            _mapperMock.Map<Entities.Order>(createEditDTO).Returns(order);
+            _mapperMock.Map<OrderDTO>(order).Returns(orderDTO);
 
-        //     // Act
-        //     var result = await _sut.PutAsync(Guid.NewGuid(), updateDTO);
+            return order;
+        }
 
-        //     // Assert
-        //     (result as NotFoundResult).StatusCode.Should().Be(404);
-        // }
+        private Entities.Order SetupOrderExist(CreateEditOrderDTO createEditDTO)
+        {
+            var order = NewOrder();
+            _mapperMock.Map<Entities.Order>(createEditDTO).Returns(order);
+            _orderRepositoryMock.GetAsync(order.Id).Returns(order);
 
-        // [Fact]
-        // public async Task PutAsync_CustomerExist_PublishCustomerUpdatedEvent()
-        // {
-        //     // Arrange
-        //     var updateDTO       = NewCreateEditCustomerDTO();
-        //     var customer        = NewCustomer();
-        //     var customerUpdated = MapToCustomerUpdated(customer);
-        //     _repositoryMock.GetAsync(customer.Id).Returns(customer);
-        
-        //     // Act
-        //     await _sut.PutAsync(customer.Id, updateDTO);
-        
-        //     // Assert
-        //     _publisherMock.ReceivedWithAnyArgs(1).Publish<CustomerUpdated>(customerUpdated);
-        // }
-
-        // [Fact]
-        // public async Task DeleteAsync_CustomerNotExist_Return404NotFound()
-        // {
-        //     // Arrange
-        //     Entities.Customer customerNotFound = null;
-        //     _repositoryMock.GetAsync(default).Returns(customerNotFound);
-        
-        //     // Act
-        //     var result = await _sut.DeleteAsync(Guid.NewGuid());
-        
-        //     // Assert
-        //     (result as NotFoundResult).StatusCode.Should().Be(404);
-        // }
-
-        // [Fact]
-        // public async Task DeleteAsync_CustomerExist_PublishCustomerDeletedEvent()
-        // {
-        //     // Arrange
-        //     var customer        = NewCustomer();
-        //     var customerDeleted = MapToCustomerDeleted(customer);
-        //     _repositoryMock.GetAsync(customer.Id).Returns(customer);
-
-        //     // Act
-        //     await _sut.DeleteAsync(customer.Id);
-        
-        //     // Assert
-        //     _publisherMock.ReceivedWithAnyArgs(1).Publish<CustomerDeleted>(customerDeleted);
-        // }
-
-        // [Fact]
-        // public async Task GetCustomerAddressAsync_CustomerNotExist_Return404NotFound()
-        // {
-        //     // Arrange
-        //     Entities.Customer customerNotFound = null;
-        //     _repositoryMock.GetAsync(default).Returns(customerNotFound);
-        
-        //     // Act
-        //     var result = await _sut.GetCustomerAddressAsync(Guid.NewGuid());
-        
-        //     // Assert
-        //     (result.Result as NotFoundResult).StatusCode.Should().Be(404);
-        // }
-        
-        // [Fact]
-        // public async Task GetCustomerAddressAsync_CustomerAddressNotExist_Return404NotFound()
-        // {
-        //     // Arrange
-        //     var customerWithoutAddress = NewCustomer(withAddress: false);
-        //     _repositoryMock.GetAsync(default).Returns(customerWithoutAddress);
-        
-        //     // Act
-        //     var result = await _sut.GetCustomerAddressAsync(customerWithoutAddress.Id);
-        
-        //     // Assert
-        //     (result.Result as NotFoundResult).StatusCode.Should().Be(404);
-        // }
-
-        // private CreateEditCustomerDTO NewCreateEditCustomerDTO(bool withAddress = true)
-        //     => new Faker<CreateEditCustomerDTO>()
-        //     .CustomInstantiator(f => new CreateEditCustomerDTO
-        //     (
-        //         Name           : f.Person.FullName,
-        //         Email          : f.Person.Email,
-        //         DocumentNumber : f.Random.AlphaNumeric(10),
-        //         PhoneNumber    : f.Person.Phone,
-        //         CellNumber     : f.Person.Phone,
-        //         Address        : withAddress ? NewCreateEditCustomerAddressDTO() : null
-        //     ));
-
-        // private CreateEditCustomerAddressDTO NewCreateEditCustomerAddressDTO()
-        //     => new Faker<CreateEditCustomerAddressDTO>()
-        //     .CustomInstantiator(f => new CreateEditCustomerAddressDTO
-        //     (
-        //         Street     : f.Address.StreetName(),
-        //         Number     : f.Address.BuildingNumber(),
-        //         PostalCode : f.Address.ZipCode(),
-        //         City       : f.Address.City()
-        //     ));
+            return order;
+        }
 
         private Entities.Order NewOrder()
             => new Faker<Entities.Order>()

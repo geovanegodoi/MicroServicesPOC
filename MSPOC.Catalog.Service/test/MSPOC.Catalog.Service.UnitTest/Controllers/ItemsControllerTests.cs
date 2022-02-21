@@ -34,7 +34,7 @@ namespace MSPOC.Catalog.Service.UnitTest.Controllers
         }
 
         [Fact]
-        public async Task GetByIdAsync_ItemExist_Return20Ok()
+        public async Task GetByIdAsync_ItemExist_Return200Ok()
         {
             // Arrange
             var item = NewCatalogItem();
