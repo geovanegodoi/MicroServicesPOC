@@ -72,32 +72,6 @@ namespace MSPOC.Order.Service.Controllers
             return NoContent();
         }
 
-        private async Task PublishUpdateEvent(Entity.Order order, IEnumerable<Entity.OrderItem> oldItems)
-        {
-            var orderUpdate = new OrderUpdated
-            (
-                OrderId      : order.Id, 
-                CustomerId   : order.Customer.Id, 
-                Description  : order.Description, 
-                TotalPrice   : order.CalculateOrderTotalPrice(), 
-                OrderedDate  : order.CreatedDate, 
-                DeliveryDate : order.DeliveryDate, 
-                OrderItems   : MergeOrderItems(oldItems, newItems: order.OrderItems)
-            );
-            await _baseEndpoint.Publish<OrderUpdated>(orderUpdate);
-        }
-
-        private IEnumerable<OrderItemUpdatedEvent> MergeOrderItems(IEnumerable<OrderItem> oldItems, IEnumerable<OrderItem> newItems)
-            =>  from o in oldItems
-                join n in newItems 
-                on o.Id equals n.Id
-                select new OrderItemUpdatedEvent
-                (
-                    ItemId      : n.Id,
-                    OldQuantity : o.Quantity,
-                    NewQuantity : n.Quantity
-                );
-
         [HttpGet("items/available")]
         public async Task<ActionResult<IEnumerable<CatalogItemDTO>>> GetAvailableItemsAsync()
         {
@@ -191,5 +165,31 @@ namespace MSPOC.Order.Service.Controllers
                 item.Price = catalogItem.Price;
             }
         }
+
+                private async Task PublishUpdateEvent(Entity.Order order, IEnumerable<Entity.OrderItem> oldItems)
+        {
+            var orderUpdate = new OrderUpdated
+            (
+                OrderId      : order.Id, 
+                CustomerId   : order.Customer.Id, 
+                Description  : order.Description, 
+                TotalPrice   : order.CalculateOrderTotalPrice(), 
+                OrderedDate  : order.CreatedDate, 
+                DeliveryDate : order.DeliveryDate, 
+                OrderItems   : MergeOrderItems(oldItems, newItems: order.OrderItems)
+            );
+            await _baseEndpoint.Publish<OrderUpdated>(orderUpdate);
+        }
+
+        private IEnumerable<OrderItemUpdatedEvent> MergeOrderItems(IEnumerable<OrderItem> oldItems, IEnumerable<OrderItem> newItems)
+            =>  from o in oldItems
+                join n in newItems 
+                on o.Id equals n.Id
+                select new OrderItemUpdatedEvent
+                (
+                    ItemId      : n.Id,
+                    OldQuantity : o.Quantity,
+                    NewQuantity : n.Quantity
+                );
     }
 }
