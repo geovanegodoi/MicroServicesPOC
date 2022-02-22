@@ -6,62 +6,24 @@ using Bogus;
 using FluentAssertions;
 using MassTransit;
 using MSPOC.Catalog.Service.Consumers;
+using MSPOC.Catalog.Service.UnitTest.Fixtures;
 using MSPOC.Events.Order;
 using NSubstitute;
 using Xunit;
+using static MSPOC.Catalog.Service.UnitTest.Fixtures.ConsumerFixture;
 
 namespace MSPOC.Catalog.Service.UnitTest.Consumers
 {
-    public class OrderUpdatedConsumerTests : OrderEventsConsumerTestsBase<OrderUpdated>
+    public class OrderUpdatedConsumerTests : OrderEventsConsumerTestsBase<OrderUpdated>, IClassFixture<ConsumerFixture>
     {
         private readonly OrderUpdatedConsumer _sut;
+        private readonly ConsumerFixture _fixture;
 
-        public OrderUpdatedConsumerTests()
+        public OrderUpdatedConsumerTests(ConsumerFixture fixture)
         {
             _sut = new OrderUpdatedConsumer(_repositoryMock, _publisherMock);
+            _fixture = fixture;
         }
-
-        /*
-        public async Task Consume(ConsumeContext<OrderUpdated> context)
-        {
-            var message = context.Message;
-            foreach (var item in message.OrderItems)
-            {
-                var entity = await _repository.GetAsync(item.ItemId);
-                if (entity == null) continue;
-                await UpdateCatalogItemAsync(item , entity);
-                await NotifyLowQuantityAsync(entity);
-            }
-        }
-        private async Task UpdateCatalogItemAsync(OrderItemUpdatedEvent orderItemUpdate, Entity.Item catalogItem)
-        {
-            var orderItem = MapToOrderItemEvent(orderItemUpdate);
-
-            if (orderItemUpdate.NewQuantity > orderItemUpdate.OldQuantity)
-            {
-                await SubtractCatalogItemAsync(orderItem, catalogItem);
-            }
-            else if (orderItemUpdate.NewQuantity < orderItemUpdate.OldQuantity)
-            {
-                await AddCatalogItemAsync(orderItem, catalogItem);
-            }
-        }
-        protected async Task SubtractCatalogItemAsync(OrderItemEvent orderItem, Entity.Item catalogItem)
-        {
-            catalogItem.Quantity -= orderItem.Quantity;
-            await _repository.UpdateAsync(catalogItem);
-        }
-        protected Task NotifyLowQuantityAsync(Entity.Item item)
-        {
-            if (item.Quantity < 10)
-            {
-                var message = new CatalogItemLowQuantity(item.Id, item.Quantity);
-                _publishEndpoint.Publish<CatalogItemLowQuantity>(message);
-            }
-            return Task.CompletedTask;
-        }
-        */
-
 
         [Fact]
         public async Task Consume_OrderUpdated_SubtractItemQuantity()
@@ -128,50 +90,7 @@ namespace MSPOC.Catalog.Service.UnitTest.Consumers
         }
 
         private (OrderUpdated orderEvent, Entities.Item item) NewEventAndItem(OrderUpdatedType orderUpdatedType)
-            => (NewOrderUpdated(orderUpdatedType), NewItem());
-
-        private enum OrderUpdatedType { ItemsIncreased, ItemsDecreased };
-
-        private OrderUpdated NewOrderUpdated(OrderUpdatedType orderUpdatedType)
-            => new Faker<OrderUpdated>()
-            .CustomInstantiator(f => new OrderUpdated
-            (
-                OrderId      : f.Random.Guid(), 
-                CustomerId   : f.Random.Guid(), 
-                Description  : f.Random.Word(), 
-                TotalPrice   : f.Random.Decimal(), 
-                OrderedDate  : f.Date.PastOffset(), 
-                DeliveryDate : f.Date.FutureOffset(), 
-                OrderItems   : NewOrderItemUpdateEvents(orderUpdatedType)
-            ));
-
-        private IEnumerable<OrderItemUpdatedEvent> NewOrderItemUpdateEvents(OrderUpdatedType orderUpdatedType)
-            => new Faker<OrderItemUpdatedEvent>()
-            .CustomInstantiator(f => GetOrderItemUpdateByType(orderUpdatedType))
-            .Generate(1);
-
-        private OrderItemUpdatedEvent GetOrderItemUpdateByType(OrderUpdatedType orderUpdatedType)
-            => orderUpdatedType == OrderUpdatedType.ItemsIncreased ?
-            NewOrderItemUpdateIncreasedQuantityEvent() :
-            NewOrderItemUpdateDecreasedQuantityEvent();
-
-        private OrderItemUpdatedEvent NewOrderItemUpdateIncreasedQuantityEvent()
-            => new Faker<OrderItemUpdatedEvent>()
-            .CustomInstantiator(f => new OrderItemUpdatedEvent
-            (
-                ItemId: f.Random.Guid(),
-                OldQuantity : 1,
-                NewQuantity: 2
-            ));
-
-        private OrderItemUpdatedEvent NewOrderItemUpdateDecreasedQuantityEvent()
-            => new Faker<OrderItemUpdatedEvent>()
-            .CustomInstantiator(f => new OrderItemUpdatedEvent
-            (
-                ItemId: f.Random.Guid(),
-                OldQuantity : 2,
-                NewQuantity: 1
-            ));
+            => (_fixture.NewOrderUpdated(orderUpdatedType), _fixture.NewItem());
 
         private int GetExpectedSubtractedItemQuantity(OrderUpdated orderUpdated, Entities.Item item)
         {

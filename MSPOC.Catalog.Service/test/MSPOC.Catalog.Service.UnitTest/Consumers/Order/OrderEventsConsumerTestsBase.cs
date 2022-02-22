@@ -27,41 +27,13 @@ namespace MSPOC.Catalog.Service.UnitTest.Consumers
             _publisherMock      = Substitute.For<IPublishEndpoint>();
             _consumeContextMock = Substitute.For<ConsumeContext<TEvent>>();
         }
-
-        protected IEnumerable<OrderItemEvent> NewOrderItemEvents(int count = 1)
-            => new Faker<OrderItemEvent>()
-            .CustomInstantiator(f => NewOrderItemEvent())
-            .Generate(count);
-
-        protected OrderItemEvent NewOrderItemEvent()
-            => new Faker<OrderItemEvent>()
-            .CustomInstantiator(f => new OrderItemEvent
-            (
-                ItemId: f.Random.Guid(),
-                Quantity: 1
-            ));
-
-        protected Entities.Item NewItem()
-            => new Faker<Entities.Item>()
-            .CustomInstantiator(f => new Entities.Item
-            {
-                Id          = f.Random.Guid(),
-                Name        = f.Commerce.ProductName(),
-                Description = f.Commerce.ProductDescription(),
-                Price       = f.Random.Decimal(),
-                Quantity    = f.Random.Int(min: 1, max: 100),
-                CreatedDate = f.Date.PastOffset()
-            });
-
-        protected CatalogItemLowQuantity MapToItemLowQuantity(Entities.Item item)
-            => new CatalogItemLowQuantity(item.Id, item.Quantity);
-
+        
         protected void VerifyPublishedItemLowQuantityEvent(Entities.Item item, int expectedEvents)
         {
             var lowQuantityEvent = new CatalogItemLowQuantity(item.Id, item.Quantity);
             _publisherMock.Received(expectedEvents).Publish<CatalogItemLowQuantity>(lowQuantityEvent);
         }
-
+        
         #pragma warning restore CS4014
     }
 }

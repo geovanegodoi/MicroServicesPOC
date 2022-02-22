@@ -11,33 +11,35 @@ using MSPOC.Catalog.Service.Models;
 using MSPOC.Events.Catalog;
 using NSubstitute;
 using Xunit;
+using MSPOC.Catalog.Service.UnitTest.Fixtures;
+using MSPOC.Catalog.Service.UnitTest.Extensions;
 
 namespace MSPOC.Catalog.Service.UnitTest.Controllers
 {
-    public class ItemsControllerTests
+    public class ItemsControllerTests : IClassFixture<ControllerFixture>
     {
         #pragma warning disable CS4014
 
         private readonly IMapper _mapperMock;
         private readonly IRepository<Entities.Item> _repositoryMock;
-        private readonly IPublishEndpoint _publishMock;
+        private readonly IPublishEndpoint _publisherMock;
         private readonly ItemsController _sut;
+        private readonly ControllerFixture _fixture;
 
-
-        public ItemsControllerTests()
+        public ItemsControllerTests(ControllerFixture fixture)
         {
             _mapperMock     = Substitute.For<IMapper>();
             _repositoryMock = Substitute.For<IRepository<Entities.Item>>();
-            _publishMock    = Substitute.For<IPublishEndpoint>();
-
-            _sut = new ItemsController(_mapperMock, _repositoryMock, _publishMock);
+            _publisherMock  = Substitute.For<IPublishEndpoint>();
+            _sut            = new ItemsController(_mapperMock, _repositoryMock, _publisherMock);
+            _fixture        = fixture;
         }
 
         [Fact]
         public async Task GetByIdAsync_ItemExist_Return200Ok()
         {
             // Arrange
-            var item = NewCatalogItem();
+            var item = _fixture.NewCatalogItem();
             _repositoryMock.GetAsync(item.Id).Returns(item);
 
             // Act
@@ -65,23 +67,22 @@ namespace MSPOC.Catalog.Service.UnitTest.Controllers
         public async Task PostAsync_ItemNotExist_PublishItemCreatedEvent()
         {
             // Arrange
-            var createDTO   = NewCreateEditItemDTO();
-            var item        = NewCatalogItem();
-            var itemCreated = MapToItemCreated(item);
+            var createDTO = _fixture.NewCreateEditItemDTO();
+            var item      = _fixture.NewCatalogItem();
             _mapperMock.Map<Entities.Item>(createDTO).Returns(item);
         
             // Act
             await _sut.PostAsync(createDTO);
         
             // Assert
-            _publishMock.ReceivedWithAnyArgs(1).Publish<CatalogItemCreated>(itemCreated);
+            VerifyPublishedEvents<CatalogItemCreated>(item, expectedEvents: 1);
         }
 
         [Fact]
         public async Task PutAsync_ItemNotExist_Return404NotFound()
         {
             // Arrange
-            var updateDTO = NewCreateEditItemDTO();
+            var updateDTO = _fixture.NewCreateEditItemDTO();
             Entities.Item itemNotFound = null;
             _repositoryMock.GetAsync(default).Returns(itemNotFound);
 
@@ -96,16 +97,15 @@ namespace MSPOC.Catalog.Service.UnitTest.Controllers
         public async Task PutAsync_ItemExist_PublishItemUpdatedEvent()
         {
             // Arrange
-            var updateDTO   = NewCreateEditItemDTO();
-            var item        = NewCatalogItem();
-            var itemUpdated = MapToItemUpdated(item);
+            var updateDTO = _fixture.NewCreateEditItemDTO();
+            var item      = _fixture.NewCatalogItem();
             _repositoryMock.GetAsync(item.Id).Returns(item);
         
             // Act
             await _sut.PutAsync(item.Id, updateDTO);
         
             // Assert
-            _publishMock.ReceivedWithAnyArgs(1).Publish<CatalogItemUpdated>(itemUpdated);
+            VerifyPublishedEvents<CatalogItemUpdated>(item, expectedEvents: 1);
         }
 
         [Fact]
@@ -126,45 +126,35 @@ namespace MSPOC.Catalog.Service.UnitTest.Controllers
         public async Task DeleteAsync_ItemExist_PublishItemDeletedEvent()
         {
             // Arrange
-            var item        = NewCatalogItem();
-            var itemDeleted = MapToItemDeleted(item);
+            var item = _fixture.NewCatalogItem();
             _repositoryMock.GetAsync(item.Id).Returns(item);
 
             // Act
             await _sut.DeleteAsync(item.Id);
         
             // Assert
-            _publishMock.ReceivedWithAnyArgs(1).Publish<CatalogItemDeleted>(itemDeleted);
+            VerifyPublishedEvents<CatalogItemDeleted>(item, expectedEvents: 1);
         }
 
-        private CreateEditItemDTO NewCreateEditItemDTO()
-            => new Faker<CreateEditItemDTO>()
-            .CustomInstantiator(f => new CreateEditItemDTO
-            (
-                Name        : f.Commerce.ProductName(),
-                Description : f.Commerce.ProductDescription(),
-                Price       : decimal.Parse(f.Commerce.Price()),
-                Quantity    : f.Random.Int(min: 1, max: 10)
-            ));
+        protected void VerifyPublishedEvents<T>(Entities.Item item, int expectedEvents) where T : class
+        {
+            var catalogEvent = GetEventByType<T>(item);
+            _publisherMock.ReceivedWithAnyArgs(expectedEvents).Publish<T>(catalogEvent);
+        }
 
-        private Entities.Item NewCatalogItem()
-            => new Faker<Entities.Item>()
-            .CustomInstantiator(f => new Entities.Item
-            {
-                Id             = f.Random.Guid(),
-                Name           = f.Person.FullName,
-                Description    = f.Commerce.ProductDescription(),
-                Price          = decimal.Parse(f.Commerce.Price()),
-                Quantity       = f.Random.Int(min:1, max: 10)
-            });
-        private CatalogItemCreated MapToItemCreated(Entities.Item item)
-            => new CatalogItemCreated(ItemId: item.Id, Name: item.Name, Price : item.Price);
+        private T GetEventByType<T>(Entities.Item item)
+        {
+            object output = null;
 
-        private CatalogItemUpdated MapToItemUpdated(Entities.Item item)
-            => new CatalogItemUpdated(ItemId: item.Id, Name: item.Name, Price : item.Price);
+            if (typeof(T) == typeof(CatalogItemCreated))
+                output = item.AsItemCreated();
+            else if (typeof(T) == typeof(CatalogItemDeleted))
+                output = item.AsItemDeleted();
+            else if (typeof(T) == typeof(CatalogItemUpdated))
+                output = item.AsItemUpdated();
 
-        private CatalogItemDeleted MapToItemDeleted(Entities.Item item)
-            => new CatalogItemDeleted(ItemId: item.Id);
+            return (T)output;
+        }
         
         #pragma warning restore CS4014
     }

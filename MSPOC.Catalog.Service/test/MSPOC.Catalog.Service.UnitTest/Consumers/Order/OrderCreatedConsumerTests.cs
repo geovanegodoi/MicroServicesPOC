@@ -4,6 +4,7 @@ using Bogus;
 using FluentAssertions;
 using MassTransit;
 using MSPOC.Catalog.Service.Consumers;
+using MSPOC.Catalog.Service.UnitTest.Fixtures;
 using MSPOC.Events.Order;
 using NSubstitute;
 using Xunit;
@@ -11,13 +12,15 @@ using Xunit;
 namespace MSPOC.Catalog.Service.UnitTest.Consumers
 {
 
-    public class OrderCreatedConsumerTests : OrderEventsConsumerTestsBase<OrderCreated>
+    public class OrderCreatedConsumerTests : OrderEventsConsumerTestsBase<OrderCreated>, IClassFixture<ConsumerFixture>
     {
         private readonly OrderCreatedConsumer _sut;
+        private readonly ConsumerFixture _fixture;
 
-        public OrderCreatedConsumerTests()
+        public OrderCreatedConsumerTests(ConsumerFixture fixture)
         {
-            _sut = new OrderCreatedConsumer(_repositoryMock, _publisherMock);
+            _sut     = new OrderCreatedConsumer(_repositoryMock, _publisherMock);
+            _fixture = fixture;
         }
 
         [Fact]
@@ -69,20 +72,8 @@ namespace MSPOC.Catalog.Service.UnitTest.Consumers
         }
 
         private (OrderCreated orderEvent, Entities.Item item) NewEventAndItem()
-            => (NewOrderCreated(), NewItem());
+            => (_fixture.NewOrderCreated(), _fixture.NewItem());
 
-        private OrderCreated NewOrderCreated()
-            => new Faker<OrderCreated>()
-            .CustomInstantiator(f => new OrderCreated
-            (
-                OrderId      : f.Random.Guid(), 
-                CustomerId   : f.Random.Guid(), 
-                Description  : f.Random.Word(), 
-                TotalPrice   : f.Random.Decimal(), 
-                OrderedDate  : f.Date.PastOffset(), 
-                DeliveryDate : f.Date.FutureOffset(), 
-                OrderItems   : NewOrderItemEvents()
-            ));
         private int GetExpectedSubtractedQuantity(OrderCreated orderEvent, Entities.Item item)
         {
             var orderItem = orderEvent.OrderItems.FirstOrDefault();

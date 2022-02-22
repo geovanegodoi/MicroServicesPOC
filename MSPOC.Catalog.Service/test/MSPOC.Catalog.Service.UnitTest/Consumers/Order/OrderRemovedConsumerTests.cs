@@ -4,19 +4,22 @@ using Bogus;
 using FluentAssertions;
 using MassTransit;
 using MSPOC.Catalog.Service.Consumers;
+using MSPOC.Catalog.Service.UnitTest.Fixtures;
 using MSPOC.Events.Order;
 using NSubstitute;
 using Xunit;
 
 namespace MSPOC.Catalog.Service.UnitTest.Consumers
 {
-    public class OrderDeletedConsumerTests : OrderEventsConsumerTestsBase<OrderRemoved>
+    public class OrderDeletedConsumerTests : OrderEventsConsumerTestsBase<OrderRemoved>, IClassFixture<ConsumerFixture>
     {
         private readonly OrderDeletedConsumer _sut;
+        private readonly ConsumerFixture _fixture;
 
-        public OrderDeletedConsumerTests()
+        public OrderDeletedConsumerTests(ConsumerFixture fixture)
         {
-            _sut = new OrderDeletedConsumer(_repositoryMock, _publisherMock);
+            _sut     = new OrderDeletedConsumer(_repositoryMock, _publisherMock);
+            _fixture = fixture;
         }
 
         [Fact]
@@ -68,17 +71,8 @@ namespace MSPOC.Catalog.Service.UnitTest.Consumers
         }
         
         private (OrderRemoved orderEvent, Entities.Item item) NewEventAndItem()
-            => (NewOrderRemoved(), NewItem());
-
-        private OrderRemoved NewOrderRemoved()
-            => new Faker<OrderRemoved>()
-            .CustomInstantiator(f => new OrderRemoved
-            (
-                OrderId      : f.Random.Guid(), 
-                CustomerId   : f.Random.Guid(), 
-                OrderItems   : NewOrderItemEvents()
-            ));
-
+            => (_fixture.NewOrderRemoved(), _fixture.NewItem());
+            
         private int GetExpectedAddedQuantity(OrderRemoved orderEvent, Entities.Item item)
         {
             var orderItem = orderEvent.OrderItems.FirstOrDefault();
