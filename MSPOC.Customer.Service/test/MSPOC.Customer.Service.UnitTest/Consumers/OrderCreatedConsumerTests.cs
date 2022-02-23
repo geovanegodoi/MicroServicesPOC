@@ -7,22 +7,25 @@ using MassTransit;
 using MSPOC.CrossCutting;
 using MSPOC.Customer.Service.Consumers;
 using MSPOC.Customer.Service.Entities;
+using MSPOC.Customer.Service.UnitTest.Fixtures;
 using MSPOC.Events.Order;
 using NSubstitute;
 using Xunit;
 
 namespace MSPOC.Customer.Service.UnitTest.Consumers
 {
-    public class OrderCreatedConsumerTests : OrderEventsConsumerTestsBase<OrderCreated>
+    public class OrderCreatedConsumerTests : OrderEventsConsumerTestsBase<OrderCreated>, IClassFixture<ConsumerFixture>
     {
         #pragma warning disable CS4014
         private readonly OrderCreatedConsumer _sut;
+        private readonly ConsumerFixture _fixture;
 
-        public OrderCreatedConsumerTests()
+        public OrderCreatedConsumerTests(ConsumerFixture fixture)
         {
-            _consumeContextMock.Message.Returns(NewOrderCreated());
-
             _sut = new OrderCreatedConsumer(_repositoryMock, _mapperMock);
+            _fixture = fixture;
+
+            _consumeContextMock.Message.Returns(_fixture.NewOrderCreated());
         }
 
         [Fact]
@@ -52,19 +55,6 @@ namespace MSPOC.Customer.Service.UnitTest.Consumers
             // Assert
             _repositoryMock.ReceivedWithAnyArgs(0).CreateAsync(default);
         }
-
-        private OrderCreated NewOrderCreated()
-            => new Faker<OrderCreated>()
-            .CustomInstantiator(f => new OrderCreated
-            (
-                OrderId      : f.Random.Guid(), 
-                CustomerId   : f.Random.Guid(), 
-                Description  : f.Random.Word(), 
-                TotalPrice   : f.Random.Decimal(), 
-                OrderedDate  : f.Date.PastOffset(), 
-                DeliveryDate : f.Date.FutureOffset(), 
-                OrderItems   : new OrderItemEvent[0]
-            ));
 
         #pragma warning restore CS4014
     }

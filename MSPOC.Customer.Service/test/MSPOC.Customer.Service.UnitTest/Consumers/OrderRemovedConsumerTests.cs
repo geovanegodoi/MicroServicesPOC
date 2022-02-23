@@ -7,22 +7,25 @@ using MassTransit;
 using MSPOC.CrossCutting;
 using MSPOC.Customer.Service.Consumers;
 using MSPOC.Customer.Service.Entities;
+using MSPOC.Customer.Service.UnitTest.Fixtures;
 using MSPOC.Events.Order;
 using NSubstitute;
 using Xunit;
 
 namespace MSPOC.Customer.Service.UnitTest.Consumers
 {
-    public class OrderRemovedConsumerTests : OrderEventsConsumerTestsBase<OrderRemoved>
+    public class OrderRemovedConsumerTests : OrderEventsConsumerTestsBase<OrderRemoved>, IClassFixture<ConsumerFixture>
     {
-        #pragma warning disable CS4014
+#pragma warning disable CS4014
         private readonly OrderRemovedConsumer _sut;
+        private readonly ConsumerFixture _fixture;
 
-        public OrderRemovedConsumerTests()
+        public OrderRemovedConsumerTests(ConsumerFixture fixture)
         {
-            _consumeContextMock.Message.Returns(NewOrderRemoved());
-
             _sut = new OrderRemovedConsumer(_repositoryMock, _mapperMock);
+            _fixture = fixture;
+
+            _consumeContextMock.Message.Returns(_fixture.NewOrderRemoved());
         }
 
         [Fact]
@@ -31,37 +34,28 @@ namespace MSPOC.Customer.Service.UnitTest.Consumers
             // Arrange
             OrderHistory historyNotFound = null;
             _repositoryMock.FindAsync(default).ReturnsForAnyArgs(historyNotFound);
-        
+
             // Act
             await _sut.Consume(_consumeContextMock);
-        
+
             // Assert
             _repositoryMock.ReceivedWithAnyArgs(0).RemoveAsync(default);
         }
-        
+
         [Fact]
         public async Task Consome_OrderRemovedWithHistory_RemoveOrderHistory()
         {
             // Arrange
             OrderHistory historyFound = new();
             _repositoryMock.FindAsync(default).ReturnsForAnyArgs(historyFound);
-        
+
             // Act
             await _sut.Consume(_consumeContextMock);
-        
+
             // Assert
             _repositoryMock.ReceivedWithAnyArgs(1).RemoveAsync(default);
         }
 
-        private OrderRemoved NewOrderRemoved()
-            => new Faker<OrderRemoved>()
-            .CustomInstantiator(f => new OrderRemoved
-            (
-                OrderId    : f.Random.Guid(), 
-                CustomerId : f.Random.Guid(),
-                OrderItems : new OrderItemEvent[0]
-            ));
-
-        #pragma warning restore CS4014
+#pragma warning restore CS4014
     }
 }
