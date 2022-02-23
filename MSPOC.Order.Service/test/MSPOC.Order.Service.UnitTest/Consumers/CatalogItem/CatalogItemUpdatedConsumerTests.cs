@@ -3,21 +3,25 @@ using Bogus;
 using MSPOC.Events.Catalog;
 using MSPOC.Order.Service.Consumers;
 using MSPOC.Order.Service.Entities;
+using MSPOC.Order.Service.UnitTest.Fixtures;
 using NSubstitute;
 using Xunit;
 
 namespace MSPOC.Order.Service.UnitTest.Consumers
 {
-    public class CatalogItemUpdatedConsumerTests : CatalogItemConsumerTestsBase<CatalogItemUpdated>
+    public class CatalogItemUpdatedConsumerTests 
+        : CatalogItemConsumerTestsBase<CatalogItemUpdated>, IClassFixture<CatalogItemConsumerFixture>
     {
         #pragma warning disable CS4014
         private readonly CatalogItemUpdatedConsumer _sut;
+        private readonly CatalogItemConsumerFixture _fixture;
 
-        public CatalogItemUpdatedConsumerTests()
+        public CatalogItemUpdatedConsumerTests(CatalogItemConsumerFixture fixture)
         {
-            _consumeContextMock.Message.Returns(NewCatalogItemUpdated());
-
             _sut = new CatalogItemUpdatedConsumer(_repositoryMock, _mapperMock);
+            _fixture = fixture;
+
+            _consumeContextMock.Message.Returns(_fixture.NewCatalogItemUpdated());
         }
 
         [Fact]
@@ -38,7 +42,7 @@ namespace MSPOC.Order.Service.UnitTest.Consumers
         public async Task Consome_CatalogItemExist_UpdateDatabase()
         {
             // Arrange
-            var itemExist = NewCatalogItem();
+            var itemExist = _fixture.NewCatalogItem();
             _repositoryMock.GetAsync(itemExist.Id).ReturnsForAnyArgs(itemExist);
         
             // Act
@@ -47,15 +51,6 @@ namespace MSPOC.Order.Service.UnitTest.Consumers
             // Assert
             _repositoryMock.ReceivedWithAnyArgs(1).UpdateAsync(itemExist);
         }
-
-        private CatalogItemUpdated NewCatalogItemUpdated()
-            => new Faker<CatalogItemUpdated>()
-            .CustomInstantiator(f => new CatalogItemUpdated
-            (
-                ItemId : f.Random.Guid(), 
-                Name   : f.Commerce.ProductName(),
-                Price  : f.Random.Decimal()
-            ));
 
         #pragma warning restore CS4014
     }

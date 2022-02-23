@@ -1,6 +1,7 @@
 using System.Threading.Tasks;
 using Bogus;
 using MSPOC.Events.Catalog;
+using MSPOC.Events.Customer;
 using MSPOC.Order.Service.Consumers;
 using MSPOC.Order.Service.Entities;
 using MSPOC.Order.Service.UnitTest.Fixtures;
@@ -9,26 +10,26 @@ using Xunit;
 
 namespace MSPOC.Order.Service.UnitTest.Consumers
 {
-    public class CatalogItemDeletedConsumerTests 
-        : CatalogItemConsumerTestsBase<CatalogItemDeleted>, IClassFixture<CatalogItemConsumerFixture>
+    public class CustomerDeletedConsumerTests 
+        : CustomerConsumerTestsBase<CustomerDeleted>, IClassFixture<CustomerConsumerFixture>
     {
         #pragma warning disable CS4014
-        private readonly CatalogItemDeletedConsumer _sut;
-        private readonly CatalogItemConsumerFixture _fixture;
+        private readonly CustomerDeletedConsumer _sut;
+        private readonly CustomerConsumerFixture _fixture;
 
-        public CatalogItemDeletedConsumerTests(CatalogItemConsumerFixture fixture)
+        public CustomerDeletedConsumerTests(CustomerConsumerFixture fixture)
         {
-            _sut = new CatalogItemDeletedConsumer(_repositoryMock, _mapperMock);
+            _sut = new CustomerDeletedConsumer(_repositoryMock, _mapperMock);
             _fixture = fixture;
 
             _consumeContextMock.Message.Returns(_fixture.NewCatalogItemDeleted());
         }
 
         [Fact]
-        public async Task Consome_CatalogItemNotExist_NotRemoveFromDatabase()
+        public async Task Consome_CustomerNotExist_NotRemoveFromDatabase()
         {
             // Arrange
-            CatalogItem itemNotExist = null;
+            Customer itemNotExist = null;
             _repositoryMock.GetAsync(default).ReturnsForAnyArgs(itemNotExist);
         
             // Act
@@ -39,17 +40,17 @@ namespace MSPOC.Order.Service.UnitTest.Consumers
         }
         
         [Fact]
-        public async Task Consome_CatalogItemExist_RemoveFromDatabase()
+        public async Task Consome_CustomerExist_RemoveFromDatabase()
         {
             // Arrange
-            var itemExist = _fixture.NewCatalogItem();
-            _repositoryMock.GetAsync(itemExist.Id).ReturnsForAnyArgs(itemExist);
+            var customerExist = _fixture.NewCustomer();
+            _repositoryMock.GetAsync(customerExist.Id).ReturnsForAnyArgs(customerExist);
         
             // Act
             await _sut.Consume(_consumeContextMock);
         
             // Assert
-            _repositoryMock.ReceivedWithAnyArgs(1).RemoveAsync(itemExist);
+            _repositoryMock.ReceivedWithAnyArgs(1).RemoveAsync(customerExist);
         }
 
         #pragma warning restore CS4014

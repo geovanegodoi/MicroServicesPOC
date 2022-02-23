@@ -7,15 +7,15 @@ using NSubstitute;
 
 namespace MSPOC.Order.Service.UnitTest.Consumers
 {
-    public abstract class CatalogItemConsumerTestsBase<TEvent> where TEvent : class
+    public abstract class CustomerConsumerTestsBase<TEvent> where TEvent : class
     {
-        protected readonly IRepository<CatalogItem> _repositoryMock;
+        protected readonly IRepository<Customer> _repositoryMock;
         protected readonly IMapper _mapperMock;
         protected readonly ConsumeContext<TEvent> _consumeContextMock;
 
-        public CatalogItemConsumerTestsBase()
+        public CustomerConsumerTestsBase()
         {
-            _repositoryMock     = Substitute.For<IRepository<CatalogItem>>();
+            _repositoryMock     = Substitute.For<IRepository<Customer>>();
             _mapperMock         = Substitute.For<IMapper>();
             _consumeContextMock = Substitute.For<ConsumeContext<TEvent>>();
         }

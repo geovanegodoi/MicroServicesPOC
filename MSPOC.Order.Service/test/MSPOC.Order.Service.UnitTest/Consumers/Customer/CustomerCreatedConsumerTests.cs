@@ -1,6 +1,7 @@
 using System.Threading.Tasks;
 using Bogus;
 using MSPOC.Events.Catalog;
+using MSPOC.Events.Customer;
 using MSPOC.Order.Service.Consumers;
 using MSPOC.Order.Service.Entities;
 using MSPOC.Order.Service.UnitTest.Fixtures;
@@ -9,26 +10,26 @@ using Xunit;
 
 namespace MSPOC.Order.Service.UnitTest.Consumers
 {
-    public class CatalogItemCreatedConsumerTests 
-        : CatalogItemConsumerTestsBase<CatalogItemCreated>, IClassFixture<CatalogItemConsumerFixture>
+    public class CustomerCreatedConsumerTests 
+        : CustomerConsumerTestsBase<CustomerCreated>, IClassFixture<CustomerConsumerFixture>
     {
         #pragma warning disable CS4014
-        private readonly CatalogItemCreatedConsumer _sut;
-        private readonly CatalogItemConsumerFixture _fixture;
+        private readonly CustomerCreatedConsumer _sut;
+        private readonly CustomerConsumerFixture _fixture;
 
-        public CatalogItemCreatedConsumerTests(CatalogItemConsumerFixture fixture)
+        public CustomerCreatedConsumerTests(CustomerConsumerFixture fixture)
         {
-            _sut = new CatalogItemCreatedConsumer(_repositoryMock, _mapperMock);
+            _sut = new CustomerCreatedConsumer(_repositoryMock, _mapperMock);
             _fixture = fixture;
 
-            _consumeContextMock.Message.Returns(_fixture.NewCatalogItemCreated());
+            _consumeContextMock.Message.Returns(_fixture.NewCustomerCreated());
         }
 
         [Fact]
-        public async Task Consome_CatalogItemNotExist_InsertDatabase()
+        public async Task Consome_CustomerNotExist_InsertDatabase()
         {
             // Arrange
-            CatalogItem itemNotExist = null;
+            Customer itemNotExist = null;
             _repositoryMock.GetAsync(default).ReturnsForAnyArgs(itemNotExist);
         
             // Act
@@ -39,11 +40,11 @@ namespace MSPOC.Order.Service.UnitTest.Consumers
         }
         
         [Fact]
-        public async Task Consome_CatalogItemExist_NotInsertDatabase()
+        public async Task Consome_CustomerExist_NotInsertDatabase()
         {
             // Arrange
-            var itemExist = _fixture.NewCatalogItem();
-            _repositoryMock.GetAsync(itemExist.Id).ReturnsForAnyArgs(itemExist);
+            var customerExist = _fixture.NewCustomer();
+            _repositoryMock.GetAsync(customerExist.Id).ReturnsForAnyArgs(customerExist);
         
             // Act
             await _sut.Consume(_consumeContextMock);
