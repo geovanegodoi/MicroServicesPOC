@@ -21,7 +21,10 @@ services:
       - catalogdbdata:/data/db
 
   catalog-service:
-    image: ggodoi1986/mspoc.catalog.service:1.0.0
+    build: 
+      context: ./MSPOC.Catalog.Service
+      dockerfile: Dockerfile
+    # image: ggodoi1986/mspoc.catalog.service:1.1.0
     container_name: catalog-service
     hostname: mspoc.catalog.service
     restart: always
@@ -29,7 +32,9 @@ services:
       - 5000:5000
     environment:
       - MongoDbSettings__Host=catalog-mongo
+      - MongoDbSettings__Port=27017
       - RabbitMQSettings__Host=rabbitmq
+      - ServiceSettings__ServiceName=Catalog
     depends_on:
       - catalog-mongo
       - rabbitmq
@@ -44,7 +49,10 @@ services:
       - customerdbdata:/data/db
 
   customer-service:
-    image: ggodoi1986/mspoc.customer.service:1.0.0
+    build: 
+      context: ./MSPOC.Customer.Service
+      dockerfile: Dockerfile
+    # image: ggodoi1986/mspoc.customer.service:1.1.0
     container_name: customer-service
     hostname: mspoc.customer.service
     restart: always
@@ -52,9 +60,11 @@ services:
       - 5001:5001
     environment:
       - MongoDbSettings__Host=customer-mongo
+      - MongoDbSettings__Port=27017
       - RabbitMQSettings__Host=rabbitmq
+      - ServiceSettings__ServiceName=Customer
     depends_on:
-      - mongo
+      - customer-mongo
       - rabbitmq
 
   order-mongo:
@@ -67,7 +77,10 @@ services:
       - orderdbdata:/data/db
 
   order-service:
-    image: ggodoi1986/mspoc.order.service:1.0.0
+    build: 
+      context: ./MSPOC.Order.Service
+      dockerfile: Dockerfile
+    # image: ggodoi1986/mspoc.order.service:1.1.0
     container_name: order-service
     hostname: mspoc.order.service
     restart: always
@@ -75,9 +88,11 @@ services:
       - 5002:5002
     environment:
       - MongoDbSettings__Host=order-mongo
+      - MongoDbSettings__Port=27017
       - RabbitMQSettings__Host=rabbitmq
+      - ServiceSettings__ServiceName=Order
     depends_on:
-      - mongo
+      - order-mongo
       - rabbitmq
 
   healthchecks:

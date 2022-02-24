@@ -6,9 +6,9 @@ ENV ASPNETCORE_URLS=http://+:5001
 
 FROM mcr.microsoft.com/dotnet/sdk:5.0 AS build
 WORKDIR /src
-COPY ["MSPOC.Customer.Service.csproj", "./"]
-COPY ["nuget.config", "./"]
-COPY ["packages/*.nupkg", "./packages/"]
+COPY ["./src/MSPOC.Customer.Service.csproj", "./"]
+COPY ["./src/packages/*.nupkg", "./packages/"]
+COPY ["./nuget.config", "./"]
 RUN dotnet restore "./MSPOC.Customer.Service.csproj"
 COPY . .
 RUN dotnet build "./MSPOC.Customer.Service.csproj" -c Release -o /app/build
@@ -18,7 +18,7 @@ RUN dotnet publish "./MSPOC.Customer.Service.csproj" -c Release -o /app/publish 
 
 FROM base AS final
 WORKDIR /app
-COPY ["dotnet.css", "./"]
+COPY ["./src/dotnet.css", "./"]
 COPY --from=publish /app/publish .
 ENTRYPOINT ["dotnet", "MSPOC.Customer.Service.dll"]
 
