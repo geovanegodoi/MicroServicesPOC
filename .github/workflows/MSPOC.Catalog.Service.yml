@@ -23,7 +23,7 @@ jobs:
         dotnet-version: 5.0.x
         
     - name: Restore dependencies
-      run: dotnet restore $PROJECT_NAME
+      run: dotnet restore $PROJECT_PATH
       
     - name: Build
       run: dotnet build --no-restore $PROJECT_PATH
