@@ -7,7 +7,7 @@ ENV ASPNETCORE_URLS=http://+:5001
 FROM mcr.microsoft.com/dotnet/sdk:5.0 AS build
 WORKDIR /src
 COPY ["./src/MSPOC.Customer.Service.csproj", "./"]
-COPY ["./src/packages/*.nupkg", "./packages/"]
+COPY ["./packages/", "./packages/"]
 COPY ["./nuget.config", "./"]
 RUN dotnet restore "./MSPOC.Customer.Service.csproj"
 COPY . .
