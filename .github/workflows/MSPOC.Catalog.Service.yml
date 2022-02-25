@@ -8,7 +8,6 @@ on:
 
 env:
   PROJECT_NAME: MSPOC.Catalog.Service
-  PROJECT_PATH: ./$PROJECT_NAME
 
 jobs:
   build:
@@ -23,10 +22,10 @@ jobs:
         dotnet-version: 5.0.x
         
     - name: Restore dependencies
-      run: dotnet restore $PROJECT_PATH
+      run: dotnet restore ./$PROJECT_NAME
       
     - name: Build
-      run: dotnet build --no-restore $PROJECT_PATH
+      run: dotnet build --no-restore ./$PROJECT_NAME
       
     - name: Test
-      run: dotnet test --no-build --verbosity normal $PROJECT_PATH
+      run: dotnet test --no-build --verbosity normal ./$PROJECT_NAME
