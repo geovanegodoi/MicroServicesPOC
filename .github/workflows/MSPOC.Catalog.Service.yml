@@ -3,8 +3,15 @@ name: MSPOC.Catalog.Service
 on:
   push:
     branches: [ master, feature/** ]
+    paths: 
+      - 'MSPOC.Catalog.Service/**'
+
   pull_request:
     branches: [ master ]
+    paths: 
+      - 'MSPOC.Catalog.Service/**'
+  
+  workflow_dispatch:
 
 env:
   PROJECT_NAME: MSPOC.Catalog.Service
