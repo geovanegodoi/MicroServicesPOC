@@ -12,7 +12,7 @@ on:
   workflow_dispatch:
 
 env:
-  PROJECT_NAME: MSPOC.Catalog.Service
+  PROJECT_NAME: MSPOC.Customer.Service
 
 jobs:
   build:
