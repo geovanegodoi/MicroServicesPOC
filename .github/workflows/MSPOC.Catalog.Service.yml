@@ -6,6 +6,9 @@ on:
   pull_request:
     branches: [ master ]
 
+env:
+  PROJECT_NAME: MSPOC.Catalog.Service
+
 jobs:
   build:
 
@@ -18,7 +21,7 @@ jobs:
       with:
         dotnet-version: 5.0.x
     - name: Restore dependencies
-      run: dotnet restore
+      run: dotnet restore ./$PROJECT_NAME
     - name: Build
       run: dotnet build --no-restore
     - name: Test
