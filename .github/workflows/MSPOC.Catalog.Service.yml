@@ -1,4 +1,4 @@
-name: .NET
+name: MSPOC.Catalog.Service
 
 on:
   push:
@@ -8,6 +8,7 @@ on:
 
 env:
   PROJECT_NAME: MSPOC.Catalog.Service
+  PROJECT_PATH: ./$PROJECT_NAME
 
 jobs:
   build:
@@ -20,9 +21,12 @@ jobs:
       uses: actions/setup-dotnet@v1
       with:
         dotnet-version: 5.0.x
+        
     - name: Restore dependencies
-      run: dotnet restore ./$PROJECT_NAME
+      run: dotnet restore $PROJECT_NAME
+      
     - name: Build
-      run: dotnet build --no-restore
+      run: dotnet build --no-restore $PROJECT_PATH
+      
     - name: Test
-      run: dotnet test --no-build --verbosity normal
+      run: dotnet test --no-build --verbosity normal $PROJECT_PATH
