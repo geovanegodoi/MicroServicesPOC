@@ -16,12 +16,12 @@ jobs:
 #################################################################################################
 ###   MSPOC.CATALOG.SERVICE   ###################################################################
 #################################################################################################
-  CI__CATALOG-SERVICE:
+  CI_CATALOG-SERVICE:
     runs-on: ubuntu-latest
     
     env:
       PROJECT_NAME: MSPOC.Catalog.Service
-      SOLUTION_PATH: ./${{ env.PROJECT_NAME }}
+      SOLUTION_PATH: ./${{ jobs.CI_CATALOG-SERVICE.PROJECT_NAME }}
 
     steps:
     - uses: actions/checkout@v2
