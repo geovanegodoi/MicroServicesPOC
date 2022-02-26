@@ -138,10 +138,13 @@ jobs:
     runs-on: ubuntu-latest
     
     env:
-      CONTEXT_PATH: ./MSPOC.Catalog.Service/
-      DOCKER_IMAGE: ggodoi1986/mspoc.catalog.service
+      CONTEXT_PATH: ./MSPOC.Catalog.Service
+      DOCKER_IMAGE: ${{ secrets.DOCKERHUB_LOGIN }}/mspoc.catalog.service
 
-    steps:            
+    steps: 
+      - name: Checkout 
+        uses: actions/checkout@v2
+        
       - name: Docker Build and Push
         uses: docker/build-push-action@v2.9.0
         with:
@@ -161,10 +164,13 @@ jobs:
     runs-on: ubuntu-latest
     
     env:
-      CONTEXT_PATH: ./MSPOC.Customer.Service/
-      DOCKER_IMAGE: ggodoi1986/mspoc.customer.service
+      CONTEXT_PATH: ./MSPOC.Customer.Service
+      DOCKER_IMAGE: ${{ secrets.DOCKERHUB_LOGIN }}/mspoc.customer.service
 
-    steps:            
+    steps:
+      - name: Checkout 
+        uses: actions/checkout@v2
+      
       - name: Docker Build and Push
         uses: docker/build-push-action@v2.9.0
         with:
@@ -184,10 +190,13 @@ jobs:
     runs-on: ubuntu-latest
     
     env:
-      CONTEXT_PATH: ./MSPOC.Order.Service/
-      DOCKER_IMAGE: ggodoi1986/mspoc.order.service
+      CONTEXT_PATH: ./MSPOC.Order.Service
+      DOCKER_IMAGE: ${{ secrets.DOCKERHUB_LOGIN }}/mspoc.order.service
 
-    steps:            
+    steps:
+      - name: Checkout 
+        uses: actions/checkout@v2
+        
       - name: Docker Build and Push
         uses: docker/build-push-action@v2.9.0
         with:
