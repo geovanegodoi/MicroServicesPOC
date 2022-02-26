@@ -21,7 +21,7 @@ jobs:
     
     env:
       PROJECT_NAME: MSPOC.Catalog.Service
-      SOLUTION_PATH: ./${{ jobs.CI_CATALOG-SERVICE.PROJECT_NAME }}
+      SOLUTION_PATH: ./MSPOC.Catalog.Service
 
     steps:
     - uses: actions/checkout@v2
@@ -49,7 +49,7 @@ jobs:
        path: ${{ env.OUTPUT_PATH }}
 
   CD_CATALOG-SERVICE:
-    needs: [CI__CATALOG-SERVICE]
+    needs: [CI_CATALOG-SERVICE]
     runs-on: ubuntu-latest
 
     steps:
