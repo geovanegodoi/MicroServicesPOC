@@ -14,7 +14,8 @@ jobs:
 #################################################################################################
 ###   CI - MSPOC.CATALOG.SERVICE   ##############################################################
 #################################################################################################
-  CI_CATALOG-SERVICE:
+  CATALOG-SERVICE-CI:
+    name: "MSPOC.Catalog.Service Build and Test"
     runs-on: ubuntu-latest
     
     env:
@@ -49,7 +50,8 @@ jobs:
 #################################################################################################
 ###   CI - MSPOC.CUSTOMER.SERVICE   #############################################################
 #################################################################################################
-  CI_CUSTOMER-SERVICE: 
+  CUSTOMER-SERVICE-CI: 
+    name: "MSPOC.Customer.Service Build and Test"
     runs-on: ubuntu-latest
     
     env:
@@ -84,7 +86,8 @@ jobs:
 #################################################################################################
 ###   CI - MSPOC.ORDER.SERVICE   ################################################################
 #################################################################################################
-  CI_ORDER-SERVICE: 
+  ORDER-SERVICE-CI:
+    name: "MSPOC.Order.Service Build and Test"
     runs-on: ubuntu-latest
     
     env:
@@ -117,24 +120,11 @@ jobs:
        path: ${{ env.OUTPUT_PATH }}
 
 #################################################################################################
-###   DOCKER_LOGIN   ############################################################################
-#################################################################################################
-  DOCKER_LOGIN:
-    needs: [ CI_CATALOG-SERVICE, CI_CUSTOMER-SERVICE, CI_ORDER-SERVICE ]
-    runs-on: ubuntu-latest
-    
-    steps:
-      - name: Docker Login
-        uses: docker/login-action@v1.13.0
-        with:
-          username: ${{ secrets.DOCKERHUB_LOGIN }}
-          password: ${{ secrets.DOCKERHUB_PWD }}
-
-#################################################################################################
 ###   CD - MSPOC.CATALOG.SERVICE   ##############################################################
 #################################################################################################
-  CD_CATALOG-SERVICE:
-    needs: [DOCKER_LOGIN]
+  CATALOG-SERVICE-DOCKER:
+    name: "MSPOC.Catalog.Service Docker Deploy"
+    needs: [CATALOG-SERVICE-CI]
     runs-on: ubuntu-latest
     
     env:
@@ -144,7 +134,13 @@ jobs:
     steps: 
       - name: Checkout 
         uses: actions/checkout@v2
-        
+
+      - name: Docker Login
+        uses: docker/login-action@v1.13.0
+        with:
+          username: ${{ secrets.DOCKERHUB_LOGIN }}
+          password: ${{ secrets.DOCKERHUB_PWD }}
+
       - name: Docker Build and Push
         uses: docker/build-push-action@v2.9.0
         with:
@@ -159,8 +155,9 @@ jobs:
 #################################################################################################
 ###   CD - MSPOC.CUSTOMER.SERVICE   #############################################################
 #################################################################################################
-  CD_CUSTOMER-SERVICE:
-    needs: [DOCKER_LOGIN]
+  CUSTOMER-SERVICE-DOCKER:
+    name: "MSPOC.Customer.Service Docker Deploy"
+    needs: [CUSTOMER-SERVICE-CI]
     runs-on: ubuntu-latest
     
     env:
@@ -170,7 +167,13 @@ jobs:
     steps:
       - name: Checkout 
         uses: actions/checkout@v2
-      
+
+      - name: Docker Login
+        uses: docker/login-action@v1.13.0
+        with:
+          username: ${{ secrets.DOCKERHUB_LOGIN }}
+          password: ${{ secrets.DOCKERHUB_PWD }}
+
       - name: Docker Build and Push
         uses: docker/build-push-action@v2.9.0
         with:
@@ -185,8 +188,9 @@ jobs:
 #################################################################################################
 ###   CD - MSPOC.ORDER.SERVICE   ################################################################
 #################################################################################################
-  CD_ORDER-SERVICE:
-    needs: [DOCKER_LOGIN]
+  ORDER-SERVICE-DOCKER:
+    name: "MSPOC.Order.Service Docker Deploy"  
+    needs: [ORDER-SERVICE-CI]
     runs-on: ubuntu-latest
     
     env:
@@ -196,7 +200,13 @@ jobs:
     steps:
       - name: Checkout 
         uses: actions/checkout@v2
-        
+
+      - name: Docker Login
+        uses: docker/login-action@v1.13.0
+        with:
+          username: ${{ secrets.DOCKERHUB_LOGIN }}
+          password: ${{ secrets.DOCKERHUB_PWD }}
+
       - name: Docker Build and Push
         uses: docker/build-push-action@v2.9.0
         with:
