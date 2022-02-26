@@ -8,8 +8,6 @@ on:
   workflow_dispatch:
 
 env:
-  MSPOC_CUSTOMER_SERVICE: MSPOC.Customer.Service
-  MSPOC_ORDER_SERVICE: MSPOC.Order.Service
   OUTPUT_PATH: ${{ github.workspace}}/.output
 
 jobs:
@@ -45,7 +43,7 @@ jobs:
     - name: Upload Build Artifact
       uses: actions/upload-artifact@v2.3.1
       with:
-       name: ${{ env.PROJECT_NAME }}
+       name: ${{ env.PROJECT_NAME }}.zip
        path: ${{ env.OUTPUT_PATH }}
 
   CD_CATALOG-SERVICE:
@@ -62,6 +60,10 @@ jobs:
 
   CI_CUSTOMER-SERVICE: 
     runs-on: ubuntu-latest
+    
+    env:
+      PROJECT_NAME: MSPOC.Customer.Service
+      SOLUTION_PATH: ./MSPOC.Customer.Service
 
     steps:
     - uses: actions/checkout@v2
@@ -71,13 +73,22 @@ jobs:
         dotnet-version: 5.0.x
         
     - name: Restore dependencies
-      run: dotnet restore ./$MSPOC_CUSTOMER_SERVICE
+      run: dotnet restore ${{ env.SOLUTION_PATH }}
       
     - name: Build
-      run: dotnet build --no-restore ./$MSPOC_CUSTOMER_SERVICE
+      run: dotnet build --no-restore ${{ env.SOLUTION_PATH }}
       
     - name: Test
-      run: dotnet test --no-build --verbosity normal ./$MSPOC_CUSTOMER_SERVICE
+      run: dotnet test --no-build --verbosity normal ${{ env.SOLUTION_PATH }}
+        
+    - name: Publish
+      run: dotnet publish ${{ env.SOLUTION_PATH }} --configuration Release --output ${{ env.OUTPUT_PATH }}
+    
+    - name: Upload Build Artifact
+      uses: actions/upload-artifact@v2.3.1
+      with:
+       name: ${{ env.PROJECT_NAME }}.zip
+       path: ${{ env.OUTPUT_PATH }}
 
   CD_CUSTOMER-SERVICE:
     needs: [CI_CUSTOMER-SERVICE]
@@ -93,6 +104,10 @@ jobs:
  
   CI_ORDER-SERVICE: 
     runs-on: ubuntu-latest
+    
+    env:
+      PROJECT_NAME: MSPOC.Order.Service
+      SOLUTION_PATH: ./MSPOC.Order.Service
 
     steps:
     - uses: actions/checkout@v2
@@ -102,13 +117,22 @@ jobs:
         dotnet-version: 5.0.x
         
     - name: Restore dependencies
-      run: dotnet restore ./$MSPOC_CATALOG_SERVICE
+      run: dotnet restore ${{ env.SOLUTION_PATH }}
       
     - name: Build
-      run: dotnet build --no-restore ./$MSPOC_CATALOG_SERVICE
+      run: dotnet build --no-restore ${{ env.SOLUTION_PATH }}
       
     - name: Test
-      run: dotnet test --no-build --verbosity normal ./$MSPOC_CATALOG_SERVICE
+      run: dotnet test --no-build --verbosity normal ${{ env.SOLUTION_PATH }}
+        
+    - name: Publish
+      run: dotnet publish ${{ env.SOLUTION_PATH }} --configuration Release --output ${{ env.OUTPUT_PATH }}
+    
+    - name: Upload Build Artifact
+      uses: actions/upload-artifact@v2.3.1
+      with:
+       name: ${{ env.PROJECT_NAME }}.zip
+       path: ${{ env.OUTPUT_PATH }}
 
   CD_ORDER-SERVICE:
     needs: [CI_ORDER-SERVICE]
