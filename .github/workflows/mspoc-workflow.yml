@@ -49,10 +49,29 @@ jobs:
   CD_CATALOG-SERVICE:
     needs: [CI_CATALOG-SERVICE]
     runs-on: ubuntu-latest
+    
+    env:
+      PROJECT_NAME: MSPOC.Catalog.Service
+      SOLUTION_PATH: ./MSPOC.Catalog.Service
+      DOCKER_IMAGE: ggodoi1986/MSPOC.Catalog.Service
 
-    steps:
-      - name: Push DockerHub
-        run: echo Hello, world!
+    steps:      
+      - name: Docker Login
+        uses: docker/login-action@v1.13.0
+        with:
+          username: ${{ secrets.DOCKERHUB_LOGIN }}
+          password: ${{ secrets.DOCKERHUB_PWD }}
+      
+      - name: Docker Build and Push
+        uses: docker/build-push-action@v2.9.0
+        with:
+          context: ${{ env.SOLUTION_PATH }}
+          file: ${{ env.SOLUTION_PATH }}/Dockerfile
+          push: true
+          tags: ${{ env.DOCKER_IMAGE }}:v${{ github.run_number }}
+#          tags: |
+#            ${{ env.DOCKER_IMAGE }}:latest
+#            ${{ env.DOCKER_IMAGE }}:v${{ github.run_number }}
   
 #################################################################################################
 ###   MSPOC.CUSTOMER.SERVICE   ##################################################################
