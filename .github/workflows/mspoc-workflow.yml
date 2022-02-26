@@ -46,21 +46,32 @@ jobs:
        name: ${{ env.PROJECT_NAME }}.zip
        path: ${{ env.OUTPUT_PATH }}
 
-  CD_CATALOG-SERVICE:
+  DOCKER_LOGIN:
     needs: [CI_CATALOG-SERVICE]
     runs-on: ubuntu-latest
     
-    env:
-      PROJECT_NAME: MSPOC.Catalog.Service
-      SOLUTION_PATH: ./MSPOC.Catalog.Service
-      DOCKER_IMAGE: ggodoi1986/MSPOC.Catalog.Service
-
-    steps:      
+    steps:
       - name: Docker Login
         uses: docker/login-action@v1.13.0
         with:
           username: ${{ secrets.DOCKERHUB_LOGIN }}
           password: ${{ secrets.DOCKERHUB_PWD }}
+
+  CD_CATALOG-SERVICE:
+    needs: [DOCKER_LOGIN]
+    runs-on: ubuntu-latest
+    
+    env:
+      PROJECT_NAME: MSPOC.Catalog.Service
+      SOLUTION_PATH: ./MSPOC.Catalog.Service
+      DOCKER_IMAGE: ggodoi1986/mspoc.catalog.service
+
+    steps:      
+#      - name: Docker Login
+#        uses: docker/login-action@v1.13.0
+#        with:
+#          username: ${{ secrets.DOCKERHUB_LOGIN }}
+#          password: ${{ secrets.DOCKERHUB_PWD }}
       
       - name: Docker Build and Push
         uses: docker/build-push-action@v2.9.0
