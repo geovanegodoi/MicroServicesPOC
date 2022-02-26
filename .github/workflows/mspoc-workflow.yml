@@ -14,8 +14,7 @@ jobs:
 #################################################################################################
 ###   CI - MSPOC.CATALOG.SERVICE   ##############################################################
 #################################################################################################
-  CATALOG-SERVICE-CI:
-    name: "Catalog Service CI"
+  CATALOG-CI:
     runs-on: ubuntu-latest
     
     env:
@@ -50,8 +49,7 @@ jobs:
 #################################################################################################
 ###   CI - MSPOC.CUSTOMER.SERVICE   #############################################################
 #################################################################################################
-  CUSTOMER-SERVICE-CI: 
-    name: "Customer Service CI"
+  CUSTOMER-CI: 
     runs-on: ubuntu-latest
     
     env:
@@ -86,8 +84,7 @@ jobs:
 #################################################################################################
 ###   CI - MSPOC.ORDER.SERVICE   ################################################################
 #################################################################################################
-  ORDER-SERVICE-CI:
-    name: "Order Service CI"
+  ORDER-CI:
     runs-on: ubuntu-latest
     
     env:
@@ -152,7 +149,7 @@ jobs:
   CHECK-VERSION:
     name: v${{ needs.SEM-VERSION.outputs.output1 }}
     runs-on: ubuntu-latest
-    needs: [CATALOG-SERVICE-CI, CUSTOMER-SERVICE-CI, ORDER-SERVICE-CI, SEM-VERSION]
+    needs: [CATALOG-CI, CUSTOMER-CI, ORDER-CI, SEM-VERSION]
       
     steps:
       - name : Version v${{ needs.SEM-VERSION.outputs.output1 }}
@@ -200,7 +197,7 @@ jobs:
 #################################################################################################
   CATALOG-SERVICE-DOCKER:
     name: "Catalog Service Docker"
-    needs: [SEM-VERSION, CATALOG-SERVICE-CI]
+    needs: [DOCKER-APPROVAL]
     runs-on: ubuntu-latest
     
     env:
@@ -238,7 +235,7 @@ jobs:
 #################################################################################################
   CUSTOMER-SERVICE-DOCKER:
     name: "Customer Service DockerHub"
-    needs: [SEM-VERSION, CUSTOMER-SERVICE-CI]
+    needs: [DOCKER-APPROVAL]
     runs-on: ubuntu-latest
     
     env:
@@ -276,7 +273,7 @@ jobs:
 #################################################################################################
   ORDER-SERVICE-DOCKER:
     name: "Order Service DockerHub"
-    needs: [SEM-VERSION, ORDER-SERVICE-CI]
+    needs: [DOCKER-APPROVAL]
     runs-on: ubuntu-latest
     
     env:
