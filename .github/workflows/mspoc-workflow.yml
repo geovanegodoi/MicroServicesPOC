@@ -16,7 +16,7 @@ jobs:
 #################################################################################################
 ###   MSPOC.CATALOG.SERVICE   ###################################################################
 #################################################################################################
-  CI_CATALOG-SERVICE:
+  CI__CATALOG-SERVICE:
     runs-on: ubuntu-latest
     
     env:
@@ -40,7 +40,7 @@ jobs:
       run: dotnet test --no-build --verbosity normal ${{ env.SOLUTION_PATH }}
         
     - name: Publish
-      run: dotnet publish ./$MSPOC_CATALOG_SERVICE --configuration Release --output ${{ env.OUTPUT_PATH }}
+      run: dotnet publish ${{ env.SOLUTION_PATH }} --configuration Release --output ${{ env.OUTPUT_PATH }}
     
     - name: Upload Build Artifact
       uses: actions/upload-artifact@v2.3.1
@@ -49,7 +49,7 @@ jobs:
        path: ${{ env.OUTPUT_PATH }}
 
   CD_CATALOG-SERVICE:
-    needs: [CI_CATALOG-SERVICE]
+    needs: [CI__CATALOG-SERVICE]
     runs-on: ubuntu-latest
 
     steps:
