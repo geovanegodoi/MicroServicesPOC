@@ -13,7 +13,10 @@ env:
   MSPOC_ORDER_SERVICE: MSPOC.Order.Service
 
 jobs:
-  CATALOG-SERVICE: 
+#################################################################################################
+###   MSPOC.CATALOG.SERVICE   ###################################################################
+#################################################################################################
+  CATALOG-SERVICE-CI:
     runs-on: ubuntu-latest
 
     steps:
@@ -31,8 +34,51 @@ jobs:
       
     - name: Test
       run: dotnet test --no-build --verbosity normal ./$MSPOC_CATALOG_SERVICE
+
+  CATALOG-SERVICE-CD:
+    needs: [CATALOG-SERVICE-CI]
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Push DockerHub
+        run: echo Hello, world!
+  
+#################################################################################################
+###   MSPOC.CUSTOMER.SERVICE   ##################################################################
+#################################################################################################
+
+  CUSTOMER-SERVICE-CI: 
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 5.0.x
+        
+    - name: Restore dependencies
+      run: dotnet restore ./$MSPOC_CUSTOMER_SERVICE
       
-  CUSTOMER-SERVICE: 
+    - name: Build
+      run: dotnet build --no-restore ./$MSPOC_CUSTOMER_SERVICE
+      
+    - name: Test
+      run: dotnet test --no-build --verbosity normal ./$MSPOC_CUSTOMER_SERVICE
+
+  CUSTOMER-SERVICE-CD:
+    needs: [CUSTOMER-SERVICE-CI]
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Push DockerHub
+        run: echo Hello, world!
+
+#################################################################################################
+###   MSPOC.ORDER.SERVICE   #####################################################################
+#################################################################################################
+ 
+  ORDER-SERVICE-CI: 
     runs-on: ubuntu-latest
 
     steps:
@@ -50,22 +96,11 @@ jobs:
       
     - name: Test
       run: dotnet test --no-build --verbosity normal ./$MSPOC_CATALOG_SERVICE
-      
-  ORDER-SERVICE: 
+
+  ORDER-SERVICE-CD:
+    needs: [ORDER-SERVICE-CI]
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v1
-      with:
-        dotnet-version: 5.0.x
-        
-    - name: Restore dependencies
-      run: dotnet restore ./$MSPOC_CATALOG_SERVICE
-      
-    - name: Build
-      run: dotnet build --no-restore ./$MSPOC_CATALOG_SERVICE
-      
-    - name: Test
-      run: dotnet test --no-build --verbosity normal ./$MSPOC_CATALOG_SERVICE
+      - name: Push DockerHub
+        run: echo Hello, world!
