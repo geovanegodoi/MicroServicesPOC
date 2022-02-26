@@ -1,0 +1,310 @@
+name: MSPOC Workflow
+
+on:
+  push:
+    branches: [ master, feature/** ]
+  pull_request:
+    branches: [ master ]
+  workflow_dispatch:
+
+env:
+  OUTPUT_PATH: ${{ github.workspace}}/.output
+
+jobs:
+#################################################################################################
+###   CI - MSPOC.CATALOG.SERVICE   ##############################################################
+#################################################################################################
+  CATALOG-CI:
+    name: CATALOG BUILD
+    runs-on: ubuntu-latest
+    
+    env:
+      PROJECT_NAME: MSPOC.Catalog.Service
+      SOLUTION_PATH: ./MSPOC.Catalog.Service
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 5.0.x
+        
+    - name: Restore dependencies
+      run: dotnet restore ${{ env.SOLUTION_PATH }}
+      
+    - name: Build
+      run: dotnet build --no-restore ${{ env.SOLUTION_PATH }}
+      
+    - name: Test
+      run: dotnet test --no-build --verbosity normal ${{ env.SOLUTION_PATH }}
+        
+    - name: Publish
+      run: dotnet publish ${{ env.SOLUTION_PATH }} --configuration Release --output ${{ env.OUTPUT_PATH }}
+    
+    - name: Upload Build Artifact
+      uses: actions/upload-artifact@v2.3.1
+      with:
+       name: ${{ env.PROJECT_NAME }}.zip
+       path: ${{ env.OUTPUT_PATH }}
+
+#################################################################################################
+###   CI - MSPOC.CUSTOMER.SERVICE   #############################################################
+#################################################################################################
+  CUSTOMER-CI: 
+    name: CUSTOMER BUILD
+    runs-on: ubuntu-latest
+    
+    env:
+      PROJECT_NAME: MSPOC.Customer.Service
+      SOLUTION_PATH: ./MSPOC.Customer.Service
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 5.0.x
+        
+    - name: Restore dependencies
+      run: dotnet restore ${{ env.SOLUTION_PATH }}
+      
+    - name: Build
+      run: dotnet build --no-restore ${{ env.SOLUTION_PATH }}
+      
+    - name: Test
+      run: dotnet test --no-build --verbosity normal ${{ env.SOLUTION_PATH }}
+        
+    - name: Publish
+      run: dotnet publish ${{ env.SOLUTION_PATH }} --configuration Release --output ${{ env.OUTPUT_PATH }}
+    
+    - name: Upload Build Artifact
+      uses: actions/upload-artifact@v2.3.1
+      with:
+       name: ${{ env.PROJECT_NAME }}.zip
+       path: ${{ env.OUTPUT_PATH }}
+
+#################################################################################################
+###   CI - MSPOC.ORDER.SERVICE   ################################################################
+#################################################################################################
+  ORDER-CI:
+    name: ORDER BUILD
+    runs-on: ubuntu-latest
+    
+    env:
+      PROJECT_NAME: MSPOC.Order.Service
+      SOLUTION_PATH: ./MSPOC.Order.Service
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 5.0.x
+        
+    - name: Restore dependencies
+      run: dotnet restore ${{ env.SOLUTION_PATH }}
+      
+    - name: Build
+      run: dotnet build --no-restore ${{ env.SOLUTION_PATH }}
+      
+    - name: Test
+      run: dotnet test --no-build --verbosity normal ${{ env.SOLUTION_PATH }}
+        
+    - name: Publish
+      run: dotnet publish ${{ env.SOLUTION_PATH }} --configuration Release --output ${{ env.OUTPUT_PATH }}
+    
+    - name: Upload Build Artifact
+      uses: actions/upload-artifact@v2.3.1
+      with:
+       name: ${{ env.PROJECT_NAME }}.zip
+       path: ${{ env.OUTPUT_PATH }}
+
+#################################################################################################
+###   SEM-VERSION   #############################################################################
+#################################################################################################
+  SEM-VERSION:
+    runs-on: ubuntu-latest
+    outputs:
+      output1: ${{ steps.version.outputs.version }}
+      
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+          
+      - name: Check Version
+        id: version
+        uses: paulhatch/semantic-version@v4.0.2
+        with:
+          # The prefix to use to identify tags
+          tag_prefix: "v"
+          major_pattern: "{MAJOR}"
+          minor_pattern: "{MINOR}"
+          format: "${major}.${minor}.${patch}"
+          short_tags: false
+          # If this is set to true, *every* commit will be treated as a new version.
+          bump_each_commit: false
+
+#################################################################################################
+###   CHECK-VERSION   ###########################################################################
+#################################################################################################
+  CHECK-VERSION:
+    name: v${{ needs.SEM-VERSION.outputs.output1 }}
+    runs-on: ubuntu-latest
+    needs: [CATALOG-CI, CUSTOMER-CI, ORDER-CI, SEM-VERSION]
+      
+    steps:
+      - name : Version v${{ needs.SEM-VERSION.outputs.output1 }}
+        run: echo ${{ needs.SEM-VERSION.outputs.output1 }}
+
+#################################################################################################
+###   CREATE-TAG   ##############################################################################
+#################################################################################################
+  CREATE-TAG:
+    runs-on: ubuntu-latest
+    needs: [SEM-VERSION, CHECK-VERSION]
+    
+    if: github.ref == 'refs/heads/main'
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      
+      - name: Create Tag ${{ needs.SEM-VERSION.outputs.output1 }}
+        uses: negz/create-tag@v1
+        with:
+          version: v${{ needs.SEM-VERSION.outputs.output1 }}
+          message: Auto-generated
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+#################################################################################################
+###   DOCKER-APPROVAL   #########################################################################
+#################################################################################################
+  DOCKER-APPROVAL:
+    runs-on: ubuntu-latest
+    needs: [CHECK-VERSION]
+    
+    if: github.ref == 'refs/heads/main'
+    
+    environment: 
+      name: DockerHub
+      url: https://hub.docker.com
+          
+    steps:
+      - name: Request Approval
+        run: echo Request Approval
+
+#################################################################################################
+###   CD - MSPOC.CATALOG.SERVICE   ##############################################################
+#################################################################################################
+  CATALOG-SERVICE-DOCKER:
+    name: "Catalog Service Docker"
+    needs: [DOCKER-APPROVAL]
+    runs-on: ubuntu-latest
+    
+    env:
+      CONTEXT_PATH: ./MSPOC.Catalog.Service
+      DOCKER_IMAGE: ${{ secrets.DOCKERHUB_LOGIN }}/mspoc.catalog.service
+
+    steps: 
+      - name: Checkout 
+        uses: actions/checkout@v2
+
+      - name: Docker Login
+        uses: docker/login-action@v1.13.0
+        with:
+          username: ${{ secrets.DOCKERHUB_LOGIN }}
+          password: ${{ secrets.DOCKERHUB_PWD }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1.6.0
+
+      - name: Docker Build and Push
+        uses: docker/build-push-action@v2.9.0
+        with:
+          context: ${{ env.CONTEXT_PATH }}
+          file: ${{ env.CONTEXT_PATH }}/Dockerfile
+          builder: ${{ steps.buildx.outputs.name }}
+          push: true
+          tags: |
+            ${{ env.DOCKER_IMAGE }}:latest
+            ${{ env.DOCKER_IMAGE }}:v${{ needs.SEM-VERSION.outputs.output1 }}
+          cache-from: type=registry,ref=${{ env.DOCKER_IMAGE }}:buildcache
+          cache-to: type=registry,ref=${{ env.DOCKER_IMAGE }}:buildcache,mode=max
+  
+#################################################################################################
+###   CD - MSPOC.CUSTOMER.SERVICE   #############################################################
+#################################################################################################
+  CUSTOMER-SERVICE-DOCKER:
+    name: "Customer Service DockerHub"
+    needs: [DOCKER-APPROVAL]
+    runs-on: ubuntu-latest
+    
+    env:
+      CONTEXT_PATH: ./MSPOC.Customer.Service
+      DOCKER_IMAGE: ${{ secrets.DOCKERHUB_LOGIN }}/mspoc.customer.service
+
+    steps:
+      - name: Checkout 
+        uses: actions/checkout@v2
+
+      - name: Docker Login
+        uses: docker/login-action@v1.13.0
+        with:
+          username: ${{ secrets.DOCKERHUB_LOGIN }}
+          password: ${{ secrets.DOCKERHUB_PWD }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1.6.0
+        
+      - name: Docker Build and Push
+        uses: docker/build-push-action@v2.9.0
+        with:
+          context: ${{ env.CONTEXT_PATH }}
+          file: ${{ env.CONTEXT_PATH }}/Dockerfile
+          builder: ${{ steps.buildx.outputs.name }}
+          push: true
+          tags: |
+            ${{ env.DOCKER_IMAGE }}:latest
+            ${{ env.DOCKER_IMAGE }}:v${{ needs.SEM-VERSION.outputs.output1 }}
+          cache-from: type=registry,ref=${{ env.DOCKER_IMAGE }}:buildcache
+          cache-to: type=registry,ref=${{ env.DOCKER_IMAGE }}:buildcache,mode=max
+
+#################################################################################################
+###   CD - MSPOC.ORDER.SERVICE   ################################################################
+#################################################################################################
+  ORDER-SERVICE-DOCKER:
+    name: "Order Service DockerHub"
+    needs: [DOCKER-APPROVAL]
+    runs-on: ubuntu-latest
+    
+    env:
+      CONTEXT_PATH: ./MSPOC.Order.Service
+      DOCKER_IMAGE: ${{ secrets.DOCKERHUB_LOGIN }}/mspoc.order.service
+
+    steps:
+      - name: Checkout 
+        uses: actions/checkout@v2
+
+      - name: Docker Login
+        uses: docker/login-action@v1.13.0
+        with:
+          username: ${{ secrets.DOCKERHUB_LOGIN }}
+          password: ${{ secrets.DOCKERHUB_PWD }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1.6.0
+
+      - name: Docker Build and Push
+        uses: docker/build-push-action@v2.9.0
+        with:
+          context: ${{ env.CONTEXT_PATH }}
+          file: ${{ env.CONTEXT_PATH }}/Dockerfile
+          builder: ${{ steps.buildx.outputs.name }}
+          push: true
+          tags: |
+            ${{ env.DOCKER_IMAGE }}:latest
+            ${{ env.DOCKER_IMAGE }}:v${{ needs.SEM-VERSION.outputs.output1 }}
+          cache-from: type=registry,ref=${{ env.DOCKER_IMAGE }}:buildcache
+          cache-to: type=registry,ref=${{ env.DOCKER_IMAGE }}:buildcache,mode=max
