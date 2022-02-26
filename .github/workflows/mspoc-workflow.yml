@@ -15,7 +15,7 @@ jobs:
 ###   CI - MSPOC.CATALOG.SERVICE   ##############################################################
 #################################################################################################
   CATALOG-SERVICE-CI:
-    name: "MSPOC.Catalog.Service Build and Test"
+    name: "Catalog Service CI"
     runs-on: ubuntu-latest
     
     env:
@@ -51,7 +51,7 @@ jobs:
 ###   CI - MSPOC.CUSTOMER.SERVICE   #############################################################
 #################################################################################################
   CUSTOMER-SERVICE-CI: 
-    name: "MSPOC.Customer.Service Build and Test"
+    name: "Customer Service CI"
     runs-on: ubuntu-latest
     
     env:
@@ -87,7 +87,7 @@ jobs:
 ###   CI - MSPOC.ORDER.SERVICE   ################################################################
 #################################################################################################
   ORDER-SERVICE-CI:
-    name: "MSPOC.Order.Service Build and Test"
+    name: "Order Service CI"
     runs-on: ubuntu-latest
     
     env:
@@ -123,7 +123,7 @@ jobs:
 ###   CD - MSPOC.CATALOG.SERVICE   ##############################################################
 #################################################################################################
   CATALOG-SERVICE-DOCKER:
-    name: "MSPOC.Catalog.Service Docker Deploy"
+    name: "Catalog Service DockerHub"
     needs: [CATALOG-SERVICE-CI]
     runs-on: ubuntu-latest
     
@@ -151,12 +151,14 @@ jobs:
 #          tags: |
 #            ${{ env.DOCKER_IMAGE }}:latest
 #            ${{ env.DOCKER_IMAGE }}:v${{ github.run_number }}
+          cache-from: type=registry,ref=${{ env.DOCKER_IMAGE }}:buildcache
+          cache-to: type=registry,ref=${{ env.DOCKER_IMAGE }}:buildcache,mode=max
   
 #################################################################################################
 ###   CD - MSPOC.CUSTOMER.SERVICE   #############################################################
 #################################################################################################
   CUSTOMER-SERVICE-DOCKER:
-    name: "MSPOC.Customer.Service Docker Deploy"
+    name: "Customer Service DockerHub"
     needs: [CUSTOMER-SERVICE-CI]
     runs-on: ubuntu-latest
     
@@ -184,12 +186,14 @@ jobs:
 #          tags: |
 #            ${{ env.DOCKER_IMAGE }}:latest
 #            ${{ env.DOCKER_IMAGE }}:v${{ github.run_number }}
+          cache-from: type=registry,ref=${{ env.DOCKER_IMAGE }}:buildcache
+          cache-to: type=registry,ref=${{ env.DOCKER_IMAGE }}:buildcache,mode=max
 
 #################################################################################################
 ###   CD - MSPOC.ORDER.SERVICE   ################################################################
 #################################################################################################
   ORDER-SERVICE-DOCKER:
-    name: "MSPOC.Order.Service Docker Deploy"  
+    name: "Order Service DockerHub"
     needs: [ORDER-SERVICE-CI]
     runs-on: ubuntu-latest
     
@@ -217,3 +221,5 @@ jobs:
 #          tags: |
 #            ${{ env.DOCKER_IMAGE }}:latest
 #            ${{ env.DOCKER_IMAGE }}:v${{ github.run_number }}
+          cache-from: type=registry,ref=${{ env.DOCKER_IMAGE }}:buildcache
+          cache-to: type=registry,ref=${{ env.DOCKER_IMAGE }}:buildcache,mode=max
