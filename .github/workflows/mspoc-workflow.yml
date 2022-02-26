@@ -8,7 +8,6 @@ on:
   workflow_dispatch:
 
 env:
-  MSPOC_CATALOG_SERVICE: MSPOC.Catalog.Service
   MSPOC_CUSTOMER_SERVICE: MSPOC.Customer.Service
   MSPOC_ORDER_SERVICE: MSPOC.Order.Service
   OUTPUT_PATH: ${{ github.workspace}}/.output
@@ -19,6 +18,10 @@ jobs:
 #################################################################################################
   CI_CATALOG-SERVICE:
     runs-on: ubuntu-latest
+    
+    env:
+      PROJECT_NAME: MSPOC.Catalog.Service
+      SOLUTION_PATH: ./${{ env.PROJECT_NAME }}
 
     steps:
     - uses: actions/checkout@v2
@@ -28,22 +31,22 @@ jobs:
         dotnet-version: 5.0.x
         
     - name: Restore dependencies
-      run: dotnet restore ./$MSPOC_CATALOG_SERVICE
+      run: dotnet restore ${{ env.SOLUTION_PATH }}
       
     - name: Build
-      run: dotnet build --no-restore ./$MSPOC_CATALOG_SERVICE
+      run: dotnet build --no-restore ${{ env.SOLUTION_PATH }}
       
     - name: Test
-      run: dotnet test --no-build --verbosity normal ./$MSPOC_CATALOG_SERVICE
+      run: dotnet test --no-build --verbosity normal ${{ env.SOLUTION_PATH }}
         
     - name: Publish
-      run: dotnet publish ./$MSPOC_CATALOG_SERVICE --configuration Release --output $OUTPUT_PATH
+      run: dotnet publish ./$MSPOC_CATALOG_SERVICE --configuration Release --output ${{ env.OUTPUT_PATH }}
     
     - name: Upload Build Artifact
       uses: actions/upload-artifact@v2.3.1
       with:
-       name: $MSPOC_CATALOG_SERVICE
-       path: $OUTPUT_PATH
+       name: ${{ env.PROJECT_NAME }}
+       path: ${{ env.OUTPUT_PATH }}
 
   CD_CATALOG-SERVICE:
     needs: [CI_CATALOG-SERVICE]
