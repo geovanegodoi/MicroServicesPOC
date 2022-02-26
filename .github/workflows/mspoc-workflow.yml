@@ -1,0 +1,71 @@
+name: MSPOC-Workflow
+
+on:
+  push:
+    branches: [ master, feature/** ]
+  pull_request:
+    branches: [ master ]
+  workflow_dispatch:
+
+env:
+  MSPOC_CATALOG_SERVICE: MSPOC.Catalog.Service
+  MSPOC_CUSTOMER_SERVICE: MSPOC.Customer.Service
+  MSPOC_ORDER_SERVICE: MSPOC.Order.Service
+
+jobs:
+  CATALOG-SERVICE: 
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 5.0.x
+        
+    - name: Restore dependencies
+      run: dotnet restore ./$MSPOC_CATALOG_SERVICE
+      
+    - name: Build
+      run: dotnet build --no-restore ./$MSPOC_CATALOG_SERVICE
+      
+    - name: Test
+      run: dotnet test --no-build --verbosity normal ./$MSPOC_CATALOG_SERVICE
+      
+  CUSTOMER-SERVICE: 
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 5.0.x
+        
+    - name: Restore dependencies
+      run: dotnet restore ./$MSPOC_CATALOG_SERVICE
+      
+    - name: Build
+      run: dotnet build --no-restore ./$MSPOC_CATALOG_SERVICE
+      
+    - name: Test
+      run: dotnet test --no-build --verbosity normal ./$MSPOC_CATALOG_SERVICE
+      
+  ORDER-SERVICE: 
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 5.0.x
+        
+    - name: Restore dependencies
+      run: dotnet restore ./$MSPOC_CATALOG_SERVICE
+      
+    - name: Build
+      run: dotnet build --no-restore ./$MSPOC_CATALOG_SERVICE
+      
+    - name: Test
+      run: dotnet test --no-build --verbosity normal ./$MSPOC_CATALOG_SERVICE
