@@ -141,11 +141,15 @@ jobs:
           username: ${{ secrets.DOCKERHUB_LOGIN }}
           password: ${{ secrets.DOCKERHUB_PWD }}
 
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1.6.0
+
       - name: Docker Build and Push
         uses: docker/build-push-action@v2.9.0
         with:
           context: ${{ env.CONTEXT_PATH }}
           file: ${{ env.CONTEXT_PATH }}/Dockerfile
+          builder: ${{ steps.buildx.outputs.name }}
           push: true
           tags: ${{ env.DOCKER_IMAGE }}:v${{ github.run_number }}
 #          tags: |
@@ -176,11 +180,15 @@ jobs:
           username: ${{ secrets.DOCKERHUB_LOGIN }}
           password: ${{ secrets.DOCKERHUB_PWD }}
 
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1.6.0
+        
       - name: Docker Build and Push
         uses: docker/build-push-action@v2.9.0
         with:
           context: ${{ env.CONTEXT_PATH }}
           file: ${{ env.CONTEXT_PATH }}/Dockerfile
+          builder: ${{ steps.buildx.outputs.name }}
           push: true
           tags: ${{ env.DOCKER_IMAGE }}:v${{ github.run_number }}
 #          tags: |
@@ -211,11 +219,15 @@ jobs:
           username: ${{ secrets.DOCKERHUB_LOGIN }}
           password: ${{ secrets.DOCKERHUB_PWD }}
 
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1.6.0
+
       - name: Docker Build and Push
         uses: docker/build-push-action@v2.9.0
         with:
           context: ${{ env.CONTEXT_PATH }}
           file: ${{ env.CONTEXT_PATH }}/Dockerfile
+          builder: ${{ steps.buildx.outputs.name }}
           push: true
           tags: ${{ env.DOCKER_IMAGE }}:v${{ github.run_number }}
 #          tags: |
