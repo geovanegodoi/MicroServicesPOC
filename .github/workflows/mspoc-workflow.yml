@@ -1,4 +1,4 @@
-name: MSPOC-Workflow
+name: MSPOC Workflow
 
 on:
   push:
@@ -11,12 +11,13 @@ env:
   MSPOC_CATALOG_SERVICE: MSPOC.Catalog.Service
   MSPOC_CUSTOMER_SERVICE: MSPOC.Customer.Service
   MSPOC_ORDER_SERVICE: MSPOC.Order.Service
+  OUTPUT_PATH: $github.workspace/.output
 
 jobs:
 #################################################################################################
 ###   MSPOC.CATALOG.SERVICE   ###################################################################
 #################################################################################################
-  CATALOG-SERVICE-CI:
+  CI_CATALOG-SERVICE:
     runs-on: ubuntu-latest
 
     steps:
@@ -34,9 +35,18 @@ jobs:
       
     - name: Test
       run: dotnet test --no-build --verbosity normal ./$MSPOC_CATALOG_SERVICE
+        
+    - name: Publish
+      run: dotnet publish ./$MSPOC_CATALOG_SERVICE --configuration Release --output $env.OUTPUT_PATH
+    
+    - name: Upload Build Artifact
+      uses: actions/upload-artifact@v2.3.1
+      with:
+       name: $MSPOC_CATALOG_SERVICE
+       path: $env.OUTPUT_PATH
 
-  CATALOG-SERVICE-CD:
-    needs: [CATALOG-SERVICE-CI]
+  CD_CATALOG-SERVICE:
+    needs: [CI_CATALOG-SERVICE]
     runs-on: ubuntu-latest
 
     steps:
@@ -47,7 +57,7 @@ jobs:
 ###   MSPOC.CUSTOMER.SERVICE   ##################################################################
 #################################################################################################
 
-  CUSTOMER-SERVICE-CI: 
+  CI_CUSTOMER-SERVICE: 
     runs-on: ubuntu-latest
 
     steps:
@@ -66,8 +76,8 @@ jobs:
     - name: Test
       run: dotnet test --no-build --verbosity normal ./$MSPOC_CUSTOMER_SERVICE
 
-  CUSTOMER-SERVICE-CD:
-    needs: [CUSTOMER-SERVICE-CI]
+  CD_CUSTOMER-SERVICE:
+    needs: [CI_CUSTOMER-SERVICE]
     runs-on: ubuntu-latest
 
     steps:
@@ -78,7 +88,7 @@ jobs:
 ###   MSPOC.ORDER.SERVICE   #####################################################################
 #################################################################################################
  
-  ORDER-SERVICE-CI: 
+  CI_ORDER-SERVICE: 
     runs-on: ubuntu-latest
 
     steps:
@@ -97,8 +107,8 @@ jobs:
     - name: Test
       run: dotnet test --no-build --verbosity normal ./$MSPOC_CATALOG_SERVICE
 
-  ORDER-SERVICE-CD:
-    needs: [ORDER-SERVICE-CI]
+  CD_ORDER-SERVICE:
+    needs: [CI_ORDER-SERVICE]
     runs-on: ubuntu-latest
 
     steps:
