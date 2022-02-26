@@ -202,7 +202,7 @@ jobs:
 #################################################################################################
   CATALOG-SERVICE-DOCKER:
     name: "CATALOG TO DOCKER"
-    needs: [DOCKER-APPROVAL]
+    needs: [SEM-VERSION, DOCKER-APPROVAL]
     runs-on: ubuntu-latest
     
     env:
@@ -240,7 +240,7 @@ jobs:
 #################################################################################################
   CUSTOMER-SERVICE-DOCKER:
     name: "CUSTOMER TO DOCKER"
-    needs: [DOCKER-APPROVAL]
+    needs: [SEM-VERSION, DOCKER-APPROVAL]
     runs-on: ubuntu-latest
     
     env:
@@ -278,7 +278,7 @@ jobs:
 #################################################################################################
   ORDER-SERVICE-DOCKER:
     name: "ORDER TO DOCKER"
-    needs: [DOCKER-APPROVAL]
+    needs: [SEM-VERSION, DOCKER-APPROVAL]
     runs-on: ubuntu-latest
     
     env:
