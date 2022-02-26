@@ -120,11 +120,87 @@ jobs:
        path: ${{ env.OUTPUT_PATH }}
 
 #################################################################################################
+###   SEM-VERSION   #############################################################################
+#################################################################################################
+  SEM-VERSION:
+    runs-on: ubuntu-latest
+    outputs:
+      output1: ${{ steps.version.outputs.version }}
+      
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+          
+      - name: Check Version
+        id: version
+        uses: paulhatch/semantic-version@v4.0.2
+        with:
+          # The prefix to use to identify tags
+          tag_prefix: "v"
+          major_pattern: "{MAJOR}"
+          minor_pattern: "{MINOR}"
+          format: "${major}.${minor}.${patch}"
+          short_tags: false
+          # If this is set to true, *every* commit will be treated as a new version.
+          bump_each_commit: false
+
+#################################################################################################
+###   CHECK-VERSION   ###########################################################################
+#################################################################################################
+  CHECK-VERSION:
+    name: v${{ needs.SEM-VERSION.outputs.output1 }}
+    runs-on: ubuntu-latest
+    needs: [CATALOG-SERVICE-CI, CUSTOMER-SERVICE-CI, ORDER-SERVICE-CI, SEM-VERSION]
+      
+    steps:
+      - name : Version v${{ needs.SEM-VERSION.outputs.output1 }}
+        run: echo ${{ needs.SEM-VERSION.outputs.output1 }}
+
+#################################################################################################
+###   CREATE-TAG   ##############################################################################
+#################################################################################################
+  CREATE-TAG:
+    runs-on: ubuntu-latest
+    needs: [SEM-VERSION, CHECK-VERSION]
+    
+    if: github.ref == 'refs/heads/main'
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      
+      - name: Create Tag ${{ needs.SEM-VERSION.outputs.output1 }}
+        uses: negz/create-tag@v1
+        with:
+          version: v${{ needs.SEM-VERSION.outputs.output1 }}
+          message: Auto-generated
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+#################################################################################################
+###   DOCKER-APPROVAL   #########################################################################
+#################################################################################################
+  DOCKER-APPROVAL:
+    runs-on: ubuntu-latest
+    needs: [CHECK-VERSION]
+    
+    if: github.ref == 'refs/heads/main'
+    
+    environment: 
+      name: DockerHub
+      url: https://hub.docker.com
+          
+    steps:
+      - name: Request Approval
+        run: echo Request Approval
+
+#################################################################################################
 ###   CD - MSPOC.CATALOG.SERVICE   ##############################################################
 #################################################################################################
   CATALOG-SERVICE-DOCKER:
-    name: "Catalog Service DockerHub"
-    needs: [CATALOG-SERVICE-CI]
+    name: "Catalog Service Docker"
+    needs: [SEM-VERSION, CATALOG-SERVICE-CI]
     runs-on: ubuntu-latest
     
     env:
@@ -151,10 +227,9 @@ jobs:
           file: ${{ env.CONTEXT_PATH }}/Dockerfile
           builder: ${{ steps.buildx.outputs.name }}
           push: true
-          tags: ${{ env.DOCKER_IMAGE }}:v${{ github.run_number }}
-#          tags: |
-#            ${{ env.DOCKER_IMAGE }}:latest
-#            ${{ env.DOCKER_IMAGE }}:v${{ github.run_number }}
+          tags: |
+            ${{ env.DOCKER_IMAGE }}:latest
+            ${{ env.DOCKER_IMAGE }}:v${{ needs.SEM-VERSION.outputs.output1 }}
           cache-from: type=registry,ref=${{ env.DOCKER_IMAGE }}:buildcache
           cache-to: type=registry,ref=${{ env.DOCKER_IMAGE }}:buildcache,mode=max
   
@@ -163,7 +238,7 @@ jobs:
 #################################################################################################
   CUSTOMER-SERVICE-DOCKER:
     name: "Customer Service DockerHub"
-    needs: [CUSTOMER-SERVICE-CI]
+    needs: [SEM-VERSION, CUSTOMER-SERVICE-CI]
     runs-on: ubuntu-latest
     
     env:
@@ -190,10 +265,9 @@ jobs:
           file: ${{ env.CONTEXT_PATH }}/Dockerfile
           builder: ${{ steps.buildx.outputs.name }}
           push: true
-          tags: ${{ env.DOCKER_IMAGE }}:v${{ github.run_number }}
-#          tags: |
-#            ${{ env.DOCKER_IMAGE }}:latest
-#            ${{ env.DOCKER_IMAGE }}:v${{ github.run_number }}
+          tags: |
+            ${{ env.DOCKER_IMAGE }}:latest
+            ${{ env.DOCKER_IMAGE }}:v${{ needs.SEM-VERSION.outputs.output1 }}
           cache-from: type=registry,ref=${{ env.DOCKER_IMAGE }}:buildcache
           cache-to: type=registry,ref=${{ env.DOCKER_IMAGE }}:buildcache,mode=max
 
@@ -202,7 +276,7 @@ jobs:
 #################################################################################################
   ORDER-SERVICE-DOCKER:
     name: "Order Service DockerHub"
-    needs: [ORDER-SERVICE-CI]
+    needs: [SEM-VERSION, ORDER-SERVICE-CI]
     runs-on: ubuntu-latest
     
     env:
@@ -229,9 +303,8 @@ jobs:
           file: ${{ env.CONTEXT_PATH }}/Dockerfile
           builder: ${{ steps.buildx.outputs.name }}
           push: true
-          tags: ${{ env.DOCKER_IMAGE }}:v${{ github.run_number }}
-#          tags: |
-#            ${{ env.DOCKER_IMAGE }}:latest
-#            ${{ env.DOCKER_IMAGE }}:v${{ github.run_number }}
+          tags: |
+            ${{ env.DOCKER_IMAGE }}:latest
+            ${{ env.DOCKER_IMAGE }}:v${{ needs.SEM-VERSION.outputs.output1 }}
           cache-from: type=registry,ref=${{ env.DOCKER_IMAGE }}:buildcache
           cache-to: type=registry,ref=${{ env.DOCKER_IMAGE }}:buildcache,mode=max
