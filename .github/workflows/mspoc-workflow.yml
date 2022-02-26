@@ -11,7 +11,7 @@ env:
   MSPOC_CATALOG_SERVICE: MSPOC.Catalog.Service
   MSPOC_CUSTOMER_SERVICE: MSPOC.Customer.Service
   MSPOC_ORDER_SERVICE: MSPOC.Order.Service
-  OUTPUT_PATH: $github.workspace/.output
+  OUTPUT_PATH: ${{ github.workspace}}/.output
 
 jobs:
 #################################################################################################
@@ -37,13 +37,13 @@ jobs:
       run: dotnet test --no-build --verbosity normal ./$MSPOC_CATALOG_SERVICE
         
     - name: Publish
-      run: dotnet publish ./$MSPOC_CATALOG_SERVICE --configuration Release --output $env.OUTPUT_PATH
+      run: dotnet publish ./$MSPOC_CATALOG_SERVICE --configuration Release --output $OUTPUT_PATH
     
     - name: Upload Build Artifact
       uses: actions/upload-artifact@v2.3.1
       with:
        name: $MSPOC_CATALOG_SERVICE
-       path: $env.OUTPUT_PATH
+       path: $OUTPUT_PATH
 
   CD_CATALOG-SERVICE:
     needs: [CI_CATALOG-SERVICE]
