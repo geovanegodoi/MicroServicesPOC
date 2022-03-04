@@ -1,5 +1,6 @@
 using System.Threading.Tasks;
 using Bogus;
+using FluentAssertions;
 using MSPOC.Events.Catalog;
 using MSPOC.Order.Service.Consumers;
 using MSPOC.Order.Service.Entities;
@@ -43,6 +44,7 @@ namespace MSPOC.Order.Service.UnitTest.Consumers
         {
             // Arrange
             var itemExist = _fixture.NewCatalogItem();
+            var message   = _consumeContextMock.Message;
             _repositoryMock.GetAsync(itemExist.Id).ReturnsForAnyArgs(itemExist);
         
             // Act
@@ -50,6 +52,8 @@ namespace MSPOC.Order.Service.UnitTest.Consumers
         
             // Assert
             _repositoryMock.ReceivedWithAnyArgs(1).UpdateAsync(itemExist);
+            itemExist.Name.Should().Be(message.Name);
+            itemExist.Price.Should().Be(message.Price);
         }
 
         #pragma warning restore CS4014

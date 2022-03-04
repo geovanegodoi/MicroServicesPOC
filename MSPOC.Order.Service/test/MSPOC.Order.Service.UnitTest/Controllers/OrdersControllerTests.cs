@@ -14,6 +14,8 @@ using Xunit;
 using System.Collections.Generic;
 using MSPOC.Events.Order;
 using MSPOC.Order.Service.UnitTest.Fixtures;
+using Entity = MSPOC.Order.Service.Entities;
+using System.Linq;
 
 namespace MSPOC.Order.Service.UnitTest.Controllers
 {
@@ -22,9 +24,9 @@ namespace MSPOC.Order.Service.UnitTest.Controllers
         #pragma warning disable CS4014
 
         private readonly IMapper _mapperMock;
-        private readonly IRepository<Entities.Order> _orderRepositoryMock;
-        private readonly IRepository<Entities.CatalogItem> _itemRepositoryMock;
-        private readonly IRepository<Entities.Customer> _customerRepositoryMock;
+        private readonly IRepository<Entity.Order> _orderRepositoryMock;
+        private readonly IRepository<Entity.CatalogItem> _itemRepositoryMock;
+        private readonly IRepository<Entity.Customer> _customerRepositoryMock;
         private readonly IPublishEndpoint _publisherMock;
         private readonly OrdersController _sut;
         private readonly ControllerFixture _fixture;
@@ -32,9 +34,9 @@ namespace MSPOC.Order.Service.UnitTest.Controllers
         public OrdersControllerTests(ControllerFixture fixture)
         {
             _mapperMock = Substitute.For<IMapper>();
-            _orderRepositoryMock = Substitute.For<IRepository<Entities.Order>>();
-            _itemRepositoryMock = Substitute.For<IRepository<Entities.CatalogItem>>();
-            _customerRepositoryMock = Substitute.For<IRepository<Entities.Customer>>();
+            _orderRepositoryMock = Substitute.For<IRepository<Entity.Order>>();
+            _itemRepositoryMock = Substitute.For<IRepository<Entity.CatalogItem>>();
+            _customerRepositoryMock = Substitute.For<IRepository<Entity.Customer>>();
 
             _publisherMock = Substitute.For<IPublishEndpoint>();
 
@@ -67,7 +69,7 @@ namespace MSPOC.Order.Service.UnitTest.Controllers
         public async Task GetByIdAsync_OrderNotExist_Return404NotFound()
         {
             // Arrange
-            Entities.Order orderNotExist = null;
+            Entity.Order orderNotExist = null;
             _orderRepositoryMock.GetAsync(default).Returns(orderNotExist);
 
             // Act
@@ -82,7 +84,7 @@ namespace MSPOC.Order.Service.UnitTest.Controllers
         {
             // Arrange
             var createDTO = _fixture.NewCreateEditOrderDTO();
-            Entities.Customer customerNotExist = null;
+            Entity.Customer customerNotExist = null;
             _customerRepositoryMock.GetAsync(default).Returns(customerNotExist);
 
             // Act
@@ -97,7 +99,7 @@ namespace MSPOC.Order.Service.UnitTest.Controllers
         {
             // Arrange
             var createDTO = _fixture.NewCreateEditOrderDTO();
-            Entities.CatalogItem itemNotExist = null;
+            Entity.CatalogItem itemNotExist = null;
             _itemRepositoryMock.GetAsync(default).Returns(itemNotExist);
 
             // Act
@@ -105,6 +107,23 @@ namespace MSPOC.Order.Service.UnitTest.Controllers
 
             // Assert
             (action.Result as BadRequestObjectResult).StatusCode.Should().Be(400);
+        }
+
+        [Fact]
+        public async Task PostAsync_OrderNotExist_InsertOrderEntity()
+        {
+            // Arrange
+            SetupExistingCustomerAndCatalogItem();
+            var createDTO    = _fixture.NewCreateEditOrderDTO();
+            var order        = SetupOrderNotExist(createDTO);
+            var orderCreated = MapToOrderCreated(order);
+            _mapperMock.Map<OrderCreated>(order).Returns(orderCreated);
+
+            // Act
+            await _sut.PostAsync(createDTO);
+        
+            // Assert
+            _orderRepositoryMock.Received(1).CreateAsync(order);
         }
 
         [Fact]
@@ -129,7 +148,7 @@ namespace MSPOC.Order.Service.UnitTest.Controllers
         {
             // Arrange
             var editDTO = _fixture.NewCreateEditOrderDTO();
-            Entities.Customer customerNotExist = null;
+            Entity.Customer customerNotExist = null;
             _customerRepositoryMock.GetAsync(default).Returns(customerNotExist);
 
             // Act
@@ -144,7 +163,7 @@ namespace MSPOC.Order.Service.UnitTest.Controllers
         {
             // Arrange
             var editDTO = _fixture.NewCreateEditOrderDTO();
-            Entities.CatalogItem itemNotExist = null;
+            Entity.CatalogItem itemNotExist = null;
             _itemRepositoryMock.GetAsync(default).Returns(itemNotExist);
 
             // Act
@@ -160,7 +179,7 @@ namespace MSPOC.Order.Service.UnitTest.Controllers
             // Arrange
             SetupExistingCustomerAndCatalogItem();
             var editDTO = _fixture.NewCreateEditOrderDTO();
-            Entities.Order orderNotExist = null;
+            Entity.Order orderNotExist = null;
             _orderRepositoryMock.GetAsync(default).Returns(orderNotExist);
 
             // Act
@@ -168,6 +187,23 @@ namespace MSPOC.Order.Service.UnitTest.Controllers
         
             // Assert
             (action as NotFoundObjectResult).StatusCode.Should().Be(404);
+        }
+
+        [Fact]
+        public async Task PutAsync_OrderExist_UpdateOrderEntity()
+        {
+            // Arrange
+            SetupExistingCustomerAndCatalogItem();
+            var editDTO      = _fixture.NewCreateEditOrderDTO();
+            var order        = SetupOrderExist(editDTO);
+            var orderUpdated = MapToOrderUpdated(order);
+            _mapperMock.Map<OrderUpdated>(order).Returns(orderUpdated);
+
+            // Act
+            await _sut.PutAsync(order.Id, editDTO);
+        
+            // Assert
+            _orderRepositoryMock.Received(1).UpdateAsync(order);
         }
 
         [Fact]
@@ -191,7 +227,7 @@ namespace MSPOC.Order.Service.UnitTest.Controllers
         public async Task DeleteAsync_OrderNotExist_Return404NotFound()
         {
             // Arrange
-            Entities.Order orderNotExist = null;
+            Entity.Order orderNotExist = null;
             _orderRepositoryMock.GetAsync(default).Returns(orderNotExist);
         
             // Act
@@ -226,26 +262,26 @@ namespace MSPOC.Order.Service.UnitTest.Controllers
             _itemRepositoryMock.GetAsync(default).ReturnsForAnyArgs(catalogItem);
         }
 
-        private Entities.Order SetupOrderNotExist(CreateEditOrderDTO createEditDTO)
+        private Entity.Order SetupOrderNotExist(CreateEditOrderDTO createEditDTO)
         {
             var order    = _fixture.NewOrder();
             var orderDTO = MapToOrderDTO(order);
-            _mapperMock.Map<Entities.Order>(createEditDTO).Returns(order);
+            _mapperMock.Map<Entity.Order>(createEditDTO).Returns(order);
             _mapperMock.Map<OrderDTO>(order).Returns(orderDTO);
 
             return order;
         }
 
-        private Entities.Order SetupOrderExist(CreateEditOrderDTO createEditDTO)
+        private Entity.Order SetupOrderExist(CreateEditOrderDTO createEditDTO)
         {
             var order = _fixture.NewOrder();
-            _mapperMock.Map<Entities.Order>(createEditDTO).Returns(order);
+            _mapperMock.Map<Entity.Order>(createEditDTO).Returns(order);
             _orderRepositoryMock.GetAsync(order.Id).Returns(order);
 
             return order;
         }
 
-        private OrderDTO MapToOrderDTO(Entities.Order order)
+        private OrderDTO MapToOrderDTO(Entity.Order order)
             => new OrderDTO
             (
                 Id           : order.Id,
@@ -256,7 +292,7 @@ namespace MSPOC.Order.Service.UnitTest.Controllers
                 OrderItems   : null
             );
 
-        private OrderCreated MapToOrderCreated(Entities.Order order)
+        private OrderCreated MapToOrderCreated(Entity.Order order)
             => new OrderCreated
             (
                 OrderId      : order.Id,
@@ -268,7 +304,7 @@ namespace MSPOC.Order.Service.UnitTest.Controllers
                 OrderItems   : new OrderItemEvent[0]
             );
 
-        private OrderUpdated MapToOrderUpdated(Entities.Order order)
+        private OrderUpdated MapToOrderUpdated(Entity.Order order)
             => new OrderUpdated
             (
                 OrderId      : order.Id,
@@ -280,7 +316,7 @@ namespace MSPOC.Order.Service.UnitTest.Controllers
                 OrderItems   : new OrderItemUpdatedEvent[0]
             );
 
-        private OrderRemoved MapToOrderRemoved(Entities.Order order)
+        private OrderRemoved MapToOrderRemoved(Entity.Order order)
             => new OrderRemoved
             (
                 OrderId      : order.Id,
