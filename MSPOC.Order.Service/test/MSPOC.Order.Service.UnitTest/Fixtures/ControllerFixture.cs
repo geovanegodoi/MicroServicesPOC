@@ -1,14 +1,15 @@
 using System.Collections.Generic;
 using Bogus;
 using MSPOC.Order.Service.Models;
+using Entity = MSPOC.Order.Service.Entities;
 
 namespace MSPOC.Order.Service.UnitTest.Fixtures
 {
     public class ControllerFixture
     {
-        public Entities.Order NewOrder()
-            => new Faker<Entities.Order>()
-            .CustomInstantiator(f => new Entities.Order
+        public Entity.Order NewOrder()
+            => new Faker<Entity.Order>()
+            .CustomInstantiator(f => new Entity.Order
             {
                 Id           = f.Random.Guid(),
                 Number       = f.Random.AlphaNumeric(10),
@@ -18,14 +19,14 @@ namespace MSPOC.Order.Service.UnitTest.Fixtures
                 Customer     = NewCustomer(),
             });
         
-        public IEnumerable<Entities.OrderItem> NewOrderItems(int count = 1)
-            => new Faker<Entities.OrderItem>()
+        public IEnumerable<Entity.OrderItem> NewOrderItems(int count = 1)
+            => new Faker<Entity.OrderItem>()
             .CustomInstantiator(f => NewOrderItem())
             .Generate(count);
 
-        public Entities.OrderItem NewOrderItem()
-            => new Faker<Entities.OrderItem>()
-            .CustomInstantiator(f => new Entities.OrderItem
+        public Entity.OrderItem NewOrderItem()
+            => new Faker<Entity.OrderItem>()
+            .CustomInstantiator(f => new Entity.OrderItem
             {
                 Id       = f.Random.Guid(),
                 Name     = f.Commerce.ProductName(),
@@ -33,18 +34,18 @@ namespace MSPOC.Order.Service.UnitTest.Fixtures
                 Quantity = f.Random.Int(min: 1, max: 10)
             });
         
-        public Entities.Customer NewCustomer()
-            => new Faker<Entities.Customer>()
-            .CustomInstantiator(f => new Entities.Customer
+        public Entity.Customer NewCustomer()
+            => new Faker<Entity.Customer>()
+            .CustomInstantiator(f => new Entity.Customer
             {
                 Id    = f.Random.Guid(),
                 Name  = f.Person.FullName,
                 Email = f.Person.Email
             });
 
-        public Entities.CatalogItem NewCatalogItem()
-            => new Faker<Entities.CatalogItem>()
-            .CustomInstantiator(f => new Entities.CatalogItem
+        public Entity.CatalogItem NewCatalogItem()
+            => new Faker<Entity.CatalogItem>()
+            .CustomInstantiator(f => new Entity.CatalogItem
             {
                 Id    = f.Random.Guid(),
                 Name  = f.Commerce.ProductName(),
