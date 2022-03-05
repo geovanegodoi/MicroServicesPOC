@@ -11,6 +11,7 @@ namespace MSPOC.Customer.Service.UnitTest.Fixtures
     {
         public IMapper MapperMock { get; set; }
         public IRepository<Entities.Customer> RepositoryMock { get; set; }
+        public IRepository<Entities.OrderHistory> OrderRepositoryMock { get; set; }
         public Entities.Customer Customer { get; set; }
         public Guid CustomerId { get; set; }
         public CustomerDTO CustomerDTO { get; set; }
@@ -78,6 +79,17 @@ namespace MSPOC.Customer.Service.UnitTest.Fixtures
                 City = f.Address.City(),
                 State = f.Address.State(),
                 Country = f.Address.Country()
+            });
+
+        public Entities.OrderHistory NewOrderHistory(Guid? customerId = null)
+            => new Faker<Entities.OrderHistory>()
+            .CustomInstantiator(f => new Entities.OrderHistory
+            {
+                CustomerId = customerId ?? f.Random.Guid(),
+                OrderId = f.Random.Guid(),
+                Description = f.Random.Words(),
+                OrderedDate = f.Date.PastOffset(),
+                DeliveryDate = f.Date.FutureOffset()
             });
     }
 }

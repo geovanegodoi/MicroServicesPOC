@@ -37,6 +37,20 @@ namespace MSPOC.Customer.Service.UnitTest.Extensions
             fixture.SetupDTOs(newCustomer);
         }
 
+        public static void SetupCustomerOrderNotExist(this ControllerFixture fixture)
+        {
+            fixture.Customer   = fixture.NewCustomer();
+            fixture.CustomerId = fixture.Customer.Id;
+        }
+
+        public static void SetupCustomerOrderExist(this ControllerFixture fixture)
+        {
+            fixture.Customer   = fixture.NewCustomer();
+            fixture.CustomerId = fixture.Customer.Id;
+            var orderHistory   = fixture.NewOrderHistory(fixture.CustomerId);
+            fixture.OrderRepositoryMock.FindAsync(default).Returns(orderHistory);
+        }
+
         private static void SetupDTOs(this ControllerFixture fixture, Entities.Customer customer)
         {
             fixture.CreateEditDTO        = fixture.NewCreateEditCustomerDTO();

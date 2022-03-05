@@ -23,19 +23,22 @@ namespace MSPOC.Customer.Service.UnitTest.Controllers
         private readonly IMapper _mapperMock;
         private readonly IRepository<Entities.Customer> _repositoryMock;
         private readonly IPublishEndpoint _publishMock;
+        private readonly IRepository<Entities.OrderHistory> _orderRepositoryMock;
         private readonly CustomersController _sut;
         private readonly ControllerFixture _fixture;
 
         public CustomersControllerTests(ControllerFixture controllerFixture)
         {
-            _mapperMock             = Substitute.For<IMapper>();
-            _repositoryMock         = Substitute.For<IRepository<Entities.Customer>>();
-            _publishMock            = Substitute.For<IPublishEndpoint>();
-            _fixture                = controllerFixture;
-            _fixture.MapperMock     = _mapperMock;
-            _fixture.RepositoryMock = _repositoryMock;
+            _mapperMock                  = Substitute.For<IMapper>();
+            _repositoryMock              = Substitute.For<IRepository<Entities.Customer>>();
+            _orderRepositoryMock         = Substitute.For<IRepository<Entities.OrderHistory>>();
+            _publishMock                 = Substitute.For<IPublishEndpoint>();
+            _fixture                     = controllerFixture;
+            _fixture.MapperMock          = _mapperMock;
+            _fixture.RepositoryMock      = _repositoryMock;
+            _fixture.OrderRepositoryMock = _orderRepositoryMock;
 
-            _sut = new CustomersController(_mapperMock, _repositoryMock, _publishMock);
+            _sut = new CustomersController(_mapperMock, _repositoryMock, _publishMock, _orderRepositoryMock);
         }
 
         [Fact]
@@ -192,6 +195,32 @@ namespace MSPOC.Customer.Service.UnitTest.Controllers
 
             // Assert
             _publishMock.Received(1).Publish<CustomerUpdated>(_fixture.UpdatedEvent);
+        }
+
+        [Fact]
+        public async Task GetCustomerOrdersAsync_OrderHistoryNotExist_Return404NotFound()
+        {
+            // Arrange
+            _fixture.SetupCustomerOrderNotExist();
+
+            // Act
+            var action = await _sut.GetCustomerOrdersAsync(_fixture.CustomerId);
+        
+            // Assert
+            (action.Result as NotFoundResult).StatusCode.Should().Be(404);
+        }
+        
+        [Fact(Skip = "Under analysis")]
+        public async Task GetCustomerOrdersAsync_OrderHistoryExist_Return200OK()
+        {
+            // Arrange
+            _fixture.SetupCustomerOrderExist();
+            
+            // Act
+            var action = await _sut.GetCustomerOrdersAsync(_fixture.CustomerId);
+        
+            // Assert
+            (action.Result as OkObjectResult).StatusCode.Should().Be(200);
         }
 
 #pragma warning restore CS4014

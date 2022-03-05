@@ -8,6 +8,7 @@ using AutoMapper;
 using MSPOC.Events.Customer;
 using MassTransit;
 using Entity = MSPOC.Customer.Service.Entities;
+using MSPOC.Customer.Service.Entities;
 
 namespace MSPOC.Customer.Service.Controllers
 { 
@@ -16,9 +17,13 @@ namespace MSPOC.Customer.Service.Controllers
     public class CustomersController 
         : CRUDControllerWithMessageBroker<IRepository<Entity.Customer>, Entity.Customer, CustomerDTO, CreateEditCustomerDTO, CustomerCreated, CustomerUpdated, CustomerDeleted>
     {
-        public CustomersController(IMapper mapper, IRepository<Entity.Customer> customerRepository, IPublishEndpoint publishEndpoint) 
+        private readonly IRepository<OrderHistory> _orderRepository;
+
+        public CustomersController(IMapper mapper, IRepository<Entity.Customer> customerRepository, IPublishEndpoint publishEndpoint, IRepository<OrderHistory> orderRepository)
             : base(mapper, baseRepository: customerRepository, baseEndpoint: publishEndpoint)
-        {}
+        {
+            _orderRepository = orderRepository;
+        }
 
         [HttpGet("{customerId}/address")]
         public async Task<ActionResult<CustomerAddressDTO>> GetCustomerAddressAsync([FromRoute]Guid customerId)
@@ -41,6 +46,16 @@ namespace MSPOC.Customer.Service.Controllers
             await base.PublishEvent<Entities.Customer, CustomerUpdated>(existingEntity);
 
             return NoContent();
+        }
+
+        [HttpGet("{customerId}/orders")]
+        public async Task<ActionResult<OrderHistoryDTO>> GetCustomerOrdersAsync([FromRoute]Guid customerId)
+        {
+            var entity = await _orderRepository.FindAsync(o => o.CustomerId == customerId);
+            if (entity is null) return NotFound();
+            var orderDTO = _baseMapper.Map<OrderHistoryDTO>(entity);
+            
+            return Ok(orderDTO);
         }
     }
 }

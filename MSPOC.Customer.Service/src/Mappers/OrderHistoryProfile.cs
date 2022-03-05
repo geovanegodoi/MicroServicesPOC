@@ -1,6 +1,7 @@
 using System;
 using AutoMapper;
 using MSPOC.Customer.Service.Entities;
+using MSPOC.Customer.Service.Models;
 using MSPOC.Events.Order;
 
 namespace MSPOC.Customer.Service.Mappers
@@ -16,6 +17,9 @@ namespace MSPOC.Customer.Service.Mappers
                 .ForMember(dest => dest.CreatedDate, opt => opt.MapFrom(src => DateTimeOffset.Now));
 
             CreateMap<OrderRemoved, OrderHistory>();
+
+            CreateMap<OrderHistory, OrderHistoryDTO>()
+                .ConstructUsing(src => new OrderHistoryDTO(src.OrderId, src.Description, src.OrderedDate, src.DeliveryDate));
         }
     }
 }
