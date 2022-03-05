@@ -48,10 +48,10 @@ namespace MSPOC.Customer.Service.UnitTest.Controllers
             _fixture.SetupCustomerExist();
 
             // Act
-            var result = await _sut.GetByIdAsync(_fixture.CustomerId);
+            var action = await _sut.GetByIdAsync(_fixture.CustomerId);
 
             // Assert
-            (result.Result as OkObjectResult).StatusCode.Should().Be(200);
+            (action.Result as OkObjectResult).StatusCode.Should().Be(200);
         }
 
         [Fact]
@@ -61,10 +61,10 @@ namespace MSPOC.Customer.Service.UnitTest.Controllers
             _fixture.SetupCustomerNotExist();
 
             // Act
-            var result = await _sut.GetByIdAsync(Guid.NewGuid());
+            var action = await _sut.GetByIdAsync(Guid.NewGuid());
 
             // Assert
-            (result.Result as NotFoundResult).StatusCode.Should().Be(404);
+            (action.Result as NotFoundResult).StatusCode.Should().Be(404);
         }
 
         [Fact]
@@ -139,10 +139,10 @@ namespace MSPOC.Customer.Service.UnitTest.Controllers
             _fixture.SetupCustomerNotExist();
 
             // Act
-            var result = await _sut.GetCustomerAddressAsync(_fixture.CustomerId);
+            var action = await _sut.GetCustomerAddressAsync(_fixture.CustomerId);
 
             // Assert
-            (result.Result as NotFoundResult).StatusCode.Should().Be(404);
+            (action.Result as NotFoundResult).StatusCode.Should().Be(404);
         }
 
         [Fact]
